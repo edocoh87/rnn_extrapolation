@@ -1,0 +1,198 @@
+\section{Theoretical Analysis}\label{sec:analysis}
+
+We turn to our theoretical analysis.
+\Secref{sec:exact_extrapolation} proves that in the setting of Section~\ref{sec:setup}, convergence of GF to a zero loss solution leads the student to extrapolate, \emph{irrespective of how large its state space dimension is}.
+\Secref{sec:approx_extrapolation} extends this result by establishing that, under mild conditions, approximate convergence leads to approximate extrapolation.
+The results of sections \ref{sec:exact_extrapolation} and~\ref{sec:approx_extrapolation} assume that GF emanates from a balanced initialization, which empirically is known to capture near-zero initialization as commonly employed in practice (see \Secref{sec:setup}).
+\Secref{sec:relaxed_balanced_assumption} theoretically supports this empirical premise, by showing that with high probability, random near-zero initialization leads to balancedness.
+
+
+
+We introduce notations that will be used throughout the analysis. 
+For a matrix $\mQ\in\R^{m\times n}$, we let $\|\mQ\|_F$, $\|\mQ\|_{\infty}$ and~$\|\mQ\|_2$ denote the Frobenius, $\ell_{\infty}$ and $\ell_2$ (spectral) norms, respectively.
+For a vector $\vv \in \R^m$, we use $\|\vv \|$ to denote the Euclidean norm and~$\evv_i$ to denote its $i^{th}$ entry.
+
+\subsection{Convergence Leads to Extrapolation} \label{sec:exact_extrapolation}
+
+Theoretical analyses of implicit generalization often assume convergence to a solution attaining zero loss (see, e.g., \cite{azulay2021implicit, gunasekar2017implicit, lyu2019gradient, woodworth2020kernel}).
+Under such an assumption, Theorem~\ref{thm:exact_extrapolation} below establishes implicit extrapolation, i.e.~that the solution to which GF converges extrapolates, \emph{irrespective of how large the student's state space dimension~$d$ is}.
+A condition posed by the theorem is that the training sequence length~$k$ is greater than two times the teacher's state space dimension~\smash{$\hat{d}$}.
+%This condition is required for the information entailed in training sequences to allow extrapolation.\amirg{I would drop this sentence, as it again points to a DOF direction. And rephrase the following sentence e..g, "In sec.. we show empirically smaller $k$ values result in failure to extrapolate."}
+We empirically demonstrate the necessity of this condition in \Secref{sec:experiments}, by showing that smaller values for~$k$ lead to failure in extrapolation.
+\begin{theorem}\label{thm:exact_extrapolation}
+Assume that $d > k > 2\hat{d}$, the teacher parameters~$\hat{\Theta}$ are balanced (Definition~\ref{def:balanced}), and the student parameters~$\Theta$ are learned by applying GF to the loss~$\mathcal{L} ( \cdot )$ (\Eqref{eq:population_loss}) starting from a balanced initialization.
+Then, if GF converges to a point~$\Theta^*$ satisfying $\mathcal{L} ( \Theta^* ) = 0$, this point extrapolates (Definition~\ref{def:extrapolation}).
+\end{theorem}
+
+In order to prove Theorem~\ref{thm:exact_extrapolation}, we introduce two lemmas:
+Lemma~\ref{lemma:balanced}, which shows that balancedness is preserved under GF;
+and 
+Lemma~\ref{lemma:exact_extrapolation}, which (through a surprising connection to a moment problem from statistics) establishes that a balanced solution attaining zero loss necessarily extrapolates. With Lemmas \ref{lemma:balanced} and~\ref{lemma:exact_extrapolation} in place, the proof of Theorem~\ref{thm:exact_extrapolation} readily follows.
+
+\begin{restatable}{lemma}{balanced}
+\label{lemma:balanced}
+Let $\Theta(\tau)$, with $\tau \geq 0$, be a curve brought forth by applying GF to the loss~$\mathcal{L} ( \cdot )$ starting from a balanced initialization.
+Then, $\Theta(\tau)$ is balanced for every $\tau \geq 0$.
+\end{restatable}
+\begin{sproof}[Proof sketch (for complete proof see \Appref{sec:lemma_balanced_proof}).]
+The result follows from the symmetric role of $\mB$ and~$\mC$ in the loss $\mathcal{L} ( \cdot )$.
+\end{sproof}
+
+\begin{lemma}\label{lemma:exact_extrapolation}
+Suppose that $d > k > 2\hat{d}$, the teacher is balanced, and that the student parameters $\Theta$ are balanced and satisfy $\mathcal{L} ( \Theta ) = 0$. Then $\Theta$ extrapolates.
+\end{lemma}
+\begin{sproof}[Proof sketch (for complete proof see \Appref{sec:exact_extrapolation_proof}).]
+The proof is based on a surprising connection to the \textit{moment problem} from statistics (recovery of a probability distribution from its moments), which has been studied for decades (see, e.g., \cite{schmudgen2017moment}). 
+
+Without loss of generality, we may assume that \smash{$\hat{\mA}$} is diagonal (if this is not the case then we apply an orthogonal eigendecomposition to~\smash{$\hat{\mA}$} and subsequently absorb eigenvectors into \smash{$\hat{\mB}$} and~\smash{$\hat{\mC}$}).
+We may also assume that \smash{$\hat{\mC}\hat{\mB} = 1$} (otherwise we absorb a scaling factor into $\mB$ and/or~$\mC$).
+%Without loss of generality we assume $\hat{\mC}\hat{\mB}=1$.\footnote{We assume the teacher is balanced and therefore $\hat{\mC}\hat{\mB}=\sum_{i=1}^{\hat{d}}b_i^2$ is non-negative. Denote $\hat{\mC}\hat{\mB}\equiv\eta$ and suppose $\eta\neq 1$. The system defined by $\Theta'=(\frac{\hat{\mC}}{\sqrt{\eta}}, \hat{\mA}, \frac{\hat{\mB}}{\sqrt{\eta}})$ has the same impulse response as $\hat{\Theta}$ scaled by $\frac{1}{\eta}$ and as a result satisfies $\mC'\mB'=1$.} 
+Since \smash{$\hat{\mC}^\top=\hat{\mB}$} (teacher is balanced), we may define a probability vector (i.e.~a vector with non-negative entries summing up to one) \smash{$\hat{\vp} \in \mathbb{R}^{\hat{d}}$} via \smash{$\hat{p}_i=\hat{\emC}_i\hat{\emB}_i$}, \smash{$i = 1 , \ldots , \hat{d}$}.
+We let \smash{$\hat{Z}$} denote the random variable whose support is \smash{$\{ \hat{A}_{1 1} , \ldots , \hat{A}_{\hat{d} \hat{d}} \}$} and which assumes the value \smash{$\hat{A}_{i i}$} with probability~\smash{$\hat{p}_i$}, \smash{$i = 1 , \ldots , \hat{d}$}.
+%From the balanced assumption we have $\hat{\mC}^\top=\hat{\mB}$ and therefore if we define 
+%$\hat{p}_i=\hat{\emC}_i\hat{\emB}_i$ we have that $\hat{p}_i\geq 0$ and $\sum_i \hat{p}_i=1$ and therefore $\hat{\vp}$ may be interpreted as a distribution over a random variable with $\hat{d}$ possible values. We shall assume that these values are $\hat{\emA}_1,\ldots,\hat{\emA}_{\hat{d}}$, and denote the corresponding random variable by $Z$.
+Notice that for every $j \in \mathbb{N}$:
+\[
+\hat{\mC} \hat{\mA}^j \hat{\mB} = \sum\nolimits_{i=1}^{\hat{d}} \hat{p}_i \hat{\emA}_{i i} ^j = \E[\hat{Z}^j]
+\text{\,,}
+\]
+meaning that the elements of the teacher's impulse response are precisely the moments of~\smash{$\hat{Z}$}.
+%Furthermore, we can also interpret elements of the impulse response of $\hat{\Theta}$ as moments of this distribution.
+%Let us write the $n^{th}$ element of the impulse response as:
+%\begin{equation}
+%\hat{\mC} \hat{\mA}^n \hat{\mB} = \sum_i \hat{p}_i \hat{\emA}_i ^n = \E_{\hat{\vp}}[\hat{Z}^n],
+%\end{equation}
+%where $\E_{\vp}[Z]$ is the expected value of a random variable $Z$ under the distribution $p$.
+
+Similarly to above we may assume~$\mA$ is diagonal, and since $\mathcal{L} ( \Theta ) = 0$ it holds that \smash{$\mC \mB = \hat{\mC}\hat{\mB} = 1$}.
+We may thus define a probability vector $\vp \in \mathbb{R}^{d}$ via $p_i=\emC_i\emB_i$, $i = 1 , \ldots , d$, and a random variable~$Z$ which assumes the value $A_{i i}$ with probability~$p_i$, $i = 1 , \ldots , d$.
+For every $j \in \mathbb{N}$:
+\[
+\mC \mA^j \mB = \sum\nolimits_{i=1}^d {p}_i \emA_{i i} ^j = \E[ Z^j]
+\text{\,,}
+\]
+and so the elements of the student's impulse response are precisely the moments of~$Z$.
+%Similarly, we can define for the learned model $\Theta$, a distribution $p_i = \emC_i \emB_i$, and write the learned impulse response as:
+%\begin{equation}
+%{\mC} {\mA}^n {\mB} = \sum_i {p}_i \emA_i ^n = \E_{\vp}[{Z}^n].
+%\end{equation}
+
+The probabilistic formulation we set forth admits an interpretation of extrapolation as a moment problem.
+Namely, since $\mathcal{L} ( \Theta ) = 0$ (i.e.~\smash{$\mC \mA^j \mB=\hat{\mC} \hat{\mA}^j \hat{\mB}$} for $j=0,\dots,k-1$) the random variables $Z$ and~\smash{$\hat{Z}$} agree on their first $k - 1$ moments, and the question is whether they agree on all higher moments as well.
+We note that this question is somewhat more challenging than that tackled in classic instances of the moment problem, since the support of the random variable whose moments we match~($Z$) is not known to coincide with the support of the random variable we seek to recover~(\smash{$\hat{Z}$}).
+Luckily, a recent powerful result allow addressing the question we face~---~\cite{cohen2011use} showed that the first $2 n$ moments of a discrete random variable~$X$ taking at most $n \in \mathbb{N}$ values uniquely define~$X$, in the sense that \emph{any} discrete random variable agreeing with these $2 n$ moments must be identical to~$X$.
+Translating this result to our setting, we have that if~$Z$ agrees with~\smash{$\hat{Z}$} on its first~\smash{$2 \hat{d}$} moments, it must be identical to~\smash{$\hat{Z}$}, and in particular it must agree with~\smash{$\hat{Z}$} on all higher moments as well. 
+The fact that \smash{$k - 1 \geq 2 \hat{d}$} then concludes the proof.
+
+%This view provides us with a moment matching interpretation of the learning problem. Namely, the fact that $\Theta$ matches the first $k$ elements of the teacher impulse response, is the same as saying they agree on the first $k-1$ moments $\E_{\vp}[{Z}^i]$ for $i\in\{1,\ldots, k-1\}$.\footnote{The matching of the $0^{th}$ moment ensures that the student also satisfies $\mC\mB=1$, and along with balancedness admits the random variable interpretation.} The question of extrapolation is whether equality in the first $k-1$ moments implies an equality in all other moments.
+ %We note that there is a slight ``twist'' here on the classic moment problems because $\hat{Z}$ and $Z$ are also different so the random variables whose moments are compared are not the same in our setting.\amirg{(i.e., both their values and their probabilities differ)}
+
+%Luckily, there are powerful results that address exactly the moment question above. In \citet[Theorem 1]{cohen2011use} it is shown that the first $2\hat{d}$ moments of a discrete random variable taking at most $\hat{d}$ different values uniquely define this random variable. Therefore, any other discrete random variable identifying with the teacher on $2\hat{d}$ moments must be the same random variable and therefore identifies on higher moments as well. Since we assumed $k > 2\hat{d}$, this result immediately implies that equality in the first $k-1$ moments implies equality in all other moments.
+
+To attain some intuition for the result we imported from \cite{cohen2011use}, consider the simple case where \smash{$\hat{d}=1$}.
+The transition matrix \smash{$\hat{\mA}$} is then a scalar \smash{$\hat{a} \in \mathbb{R}$}, the random variable \smash{$\hat{Z}$} is deterministically equal to~\smash{$\hat{a}$}, and the teacher's impulse response is given by the moments \smash{$\E[\hat{Z}^j] = \hat{a}^j$}, $j = 0 , 1 , \ldots$.
+Since by assumption \smash{$k > 2 \hat{d}$}, the fact that $\mathcal{L} ( \Theta ) = 0$ means the random variable corresponding to the student, $Z$, agrees with the first two moments of~\smash{$\hat{Z}$}.
+That is, $Z$~satisfies \smash{$\E[Z] = \hat{a}$} and \smash{$\E[Z^2] = \hat{a}^2$}.
+This implies that $\Var[Z]=\E[Z^2] - \E[Z]^2 = 0$, and therefore $Z$ is deterministically equal to~\smash{$\hat{a}$}, i.e.~it is identical to~\smash{$\hat{Z}$}.
+The two random variables thus agree on all of their moments, meaning the impulse responses of the student and teacher are the same.
+%
+%To provide some simple intuition for this result, consider the case of $\hat{d}=1$ (i.e. the teacher is governed by $\hat{a}\in\R$) and $k=3$. Then the teacher impulse response elements are $\E_{\hat{\vp}}[\hat{Z}^n] =\hat{a}^n$. If the student matches the first three of these (since $k=3$), it means it has found a random variable $Z$ and distribution $\vp$ with first and second moments $\E_{\vp}[Z] = \hat{a}_1,\E_{\vp}[Z^2]=\hat{a}_1^2$. But this implies that $\Var[Z]=\E_{\vp}[Z^2] - \E_{\vp}^2[Z] = 0$. As the variance of $Z$ is zero, $Z\equiv \hat{a}_1$. Thus, $\E_{\vp}[{Z}^n] = \hat{a}^n$ for all $n$ and the student matches the impulse response of the teacher, and therefore extrapolates.
+\end{sproof}
+
+% With Lemmas \ref{lemma:balanced} and~\ref{lemma:exact_extrapolation} in place, the proof of Theorem~\ref{thm:exact_extrapolation} readily follows.
+\begin{proof}[Proof of Theorem~\ref{thm:exact_extrapolation}]
+By Lemma~\ref{lemma:balanced} (as well as continuity considerations) $\Theta^*$~is balanced.
+Lemma~\ref{lemma:exact_extrapolation} then implies that it extrapolates.
+\end{proof}
+
+\subsection{Approximate Convergence Leads to Approximate Extrapolation} \label{sec:approx_extrapolation}
+
+Theorem~\ref{thm:exact_extrapolation} in \Secref{sec:exact_extrapolation} proves extrapolation in the case where GF converges to a zero loss solution.
+Theorem~\ref{thm:main_result} below extends this result by establishing that, as long as the teacher is \emph{stable}, approximate convergence leads to approximate extrapolation.
+\begin{theorem}\label{thm:main_result}
+Assume the conditions of Theorem~\ref{thm:exact_extrapolation}, and that the teacher parameters~$\hat{\Theta}$ are stable, i.e. the singular values of~\smash{$\hat{\mA}$} are in~$[-1,1]$.
+Assume also that~\smash{$\hat{\Theta}$} are non-degenerate, in the sense that the input-output mapping they realize is not identically zero.
+Then, for any $\epsilon > 0$ and $q \in \mathbb{N}$, there exists $\delta(\epsilon, q) > 0$ which admits the following:
+whenever GF leads the student parameters~$\Theta$ to within (Frobenius) distance $\delta(\epsilon,q)$ from a balanced point~$\Theta^*$ satisfying $\mathcal{L} ( \Theta^* ) = 0$, the student $\epsilon$-extrapolates with horizon~$q$. 
+\end{theorem}
+\begin{sproof}[Proof sketch (for complete proof see \Appref{sec:apdx:approx_extrapolation}).]
+%\nadav{I did not review this}
+In order to show $\epsilon$-extrapolation with horizon $q$ we need to show that $\forall\epsilon>0, q\in\mathbb{N}$, $\exists \delta(\epsilon,q)>0$ such that for any $\Theta'$ satisfying $||\Theta'-\Theta^*||<\delta$, we have for $n=0,\dots,q$ that
+\begin{equation}
+    \mC'(\mA')^n\mB'-\hat{\mC}\hat{\mA}^n\hat{\mB}=O(\epsilon).
+\end{equation}
+
+First, by Theorem~\ref{thm:exact_extrapolation} $\Theta^*$ is an extrapolating solution. Following the interpretation of discrete random variables of Lemma~\ref{lemma:exact_extrapolation} proof, we can bound the Wasserstein-1 distance between the extrapolating distribution defined by $\Theta^*$ and the approximating distribution defined by $\Theta'$. From Proposition 2 in \cite{wu2020optimal}, we have that if $|\mC'(\mA')^n\mB'-\mC^*(\mA^*)^n\mB^*|\le \delta$ for $n\in\lbrace 0,\dots,2\hat{d}\rbrace$, then
+\begin{equation}
+    \mathcal{W}_1(\Theta',\Theta^*)=O\left(\delta^{\frac{1}{4\hat{d}}}\right).
+\end{equation}
+
+The second part of the proof ties the error at step $p$ with the $\mathcal{W}_p$ distance \citep{biswas2021bounding}:
+\begin{equation}
+    \mC'(\mA')^p\mB'-\mC^*(\mA^*)^p\mB^*\le \mathcal{W}_p.
+\end{equation}
+The final step of the proof is based on \cite{panaretos2019statistical} and bounds $\mathcal{W}_p$ in terms of $\mathcal{W}_1$, i.e.,
+\begin{equation}
+    \mathcal{W}_p(\Theta,\Theta^*)= S^{p-1}\mathcal{W}_1(\Theta,\Theta^*),
+\end{equation}
+where $S$ is the difference between the maximal and minimal eigenvalues in the teacher and student support (due to our assumption on convergence, $S$ is bounded).
+
+
+Combining the three steps above, we have that if $|\mC'(\mA')^n\mB'-\mC^*(\mA^*)^n\mB^*|\le \delta$ for $n\in\lbrace 0,\dots,2\hat{d}\rbrace$, then $\forall p>n$ \begin{equation}\label{eq:final_inequality}
+    \mC'(\mA')^p\mB'-\mC^*(\mA^*)^p\mB^*\le S^{p-1}O\left(\delta^{\frac{1}{4\hat{d}}}\right).
+\end{equation}
+
+By setting $\delta<\left(\frac{\epsilon}{c_1\cdot S^{q-1}}\right)^{4\hat{d}}$ the RHS of \Eqref{eq:final_inequality} satisfies $c_1S^{p-1}\delta^{\frac{1}{4\hat{d}}}<\epsilon$.
+% In order to have $\epsilon$-extrapolation up to horizon $q$, we can set $\delta<\left(\frac{\epsilon}{c_1\cdot S^{q-1}}\right)^{4\hat{d}}$ and then the RHS of \Eqref{eq:final_inequality} satisfies $c_1S^{p-1}\delta^{\frac{1}{4\hat{d}}}<\epsilon$.
+\end{sproof}
+
+\ignore{
+\begin{corollary}\label{corollary:extrapolation_for_any_horizon}
+\amirg{not sure this corollary is helpful. Also seems strange that thing will work in the non-stable case so need to check this carefully.}
+If $\max_{i} A^*_i-\min_{j}A^*_j<1$ we have extrapolation for an infinite horizon.
+\end{corollary}
+The proof for Corollary \ref{corollary:extrapolation_for_any_horizon} follows by noting that $\exists\delta$ such that if $|\Theta'-\Theta^*|<\delta$, then $S<1$. With $S<1$ the final $\delta$ term does not depend on $q$ and therefore extrapolates for an infinite horizon.
+}
+
+\subsection{Balancedness Captures Near-Zero Initialization}
+\label{sec:relaxed_balanced_assumption}
+
+Theorems \ref{thm:exact_extrapolation} and~\ref{thm:main_result} assume that GF emanates from a balanced initialization, i.e.~from a point $\Theta = ( \mA , \mB , \mC )$ satisfying $\mB = \mC^\top$.
+It was shown in~\cite{cohen2022extrapolation} that theoretical predictions derived assuming balanced initialization faithfully match experiments conducted with near-zero initialization (an initialization commonly used in practice).
+Proposition~\ref{prop:implicit_bias_for_balanced_init} below theoretically supports this finding, establishing that with high probability, random near-zero initialization leads GF to arrive at an approximately balanced point, i.e.~a point $\Theta = ( \mA , \mB , \mC )$ for which the difference between $\mB$ and~$\mC^\top$ is negligible compared to their size.
+\begin{proposition}\label{prop:implicit_bias_for_balanced_init}
+Suppose that:
+\emph{(i)}~$d > 4$;
+\emph{(ii)}~the teacher parameters~$\hat{\Theta}$ are balanced and are non-degenerate, in the sense that the input-output mapping they realize is not identically zero;
+and 
+\emph{(iii)}~the student parameters are learned by applying GF to the loss~$\mathcal{L} ( \cdot )$.
+Let $\tilde{\Theta}$ be a random point in parameter space, with entries drawn independently from the standard normal distribution.
+For $\epsilon > 0$, consider the case where GF emanates from the initialization~$\epsilon \tilde{\Theta}$, and denote the resulting curve by $\Theta_\epsilon ( \tau ) = ( \mA_\epsilon ( \tau ) , \mB_\epsilon ( \tau ) , \mC_\epsilon ( \tau ) )$, with $\tau \geq 0$.
+Then, w.p. at least~$0.75$, for every $\epsilon > 0$ there exists $\tau_\epsilon \geq 0$ such that:
+\begin{equation}
+    \lim_{\epsilon\rightarrow 0^+}\frac{||\mB_{\epsilon}(\tau_\epsilon) - \mC_{\epsilon}^\top(\tau_\epsilon) ||_F}{||\mB_{\epsilon}(\tau_\epsilon) + \mC_{\epsilon}^\top(\tau_\epsilon) ||_F}=0
+    \text{\,.}
+\end{equation}
+\end{proposition}
+\begin{sproof}[Proof sketch (for complete proof see \Appref{sec:apdx:bias_to_symmetry}).]
+The idea behind the proof is as follows.
+Assume $\epsilon$ is sufficiently small.
+Then, when the entries of $\Theta = ( \mA , \mB , \mC)$ are on the order of~$\epsilon$, we have \smash{$\frac{\partial}{\partial \mB} \mathcal{L} ( \Theta ) \approx -2 \hat{\mC} \hat{\mB} \cdot \mC^\top$} and \smash{$\frac{\partial}{\partial \mC} \mathcal{L} ( \Theta ) \approx -2 \hat{\mC} \hat{\mB} \cdot \mB^\top$}.
+This implies that during the first part of the curve~$\Theta_\epsilon ( \tau )$ it holds that
+$\tfrac{d}{d \tau} ( \mB_\epsilon ( \tau ) - \mC_\epsilon^\top ( \tau ) ) \approx - 2 \hat{\mC} \hat{\mB} \cdot ( \mB_\epsilon ( \tau ) - \mC_\epsilon^\top ( \tau ) )$
+and similarly
+$\tfrac{d}{d \tau} ( \mB_\epsilon ( \tau ) + \mC_\epsilon^\top ( \tau ) ) \approx ~~~ 2 \hat{\mC} \hat{\mB} \cdot ( \mB_\epsilon ( \tau ) + \mC_\epsilon^\top ( \tau ) )$.
+%\begin{eqnarray*}
+%\tfrac{d}{d \tau} ( \mB_\epsilon ( \tau ) - \mC_\epsilon^\top ( \tau ) ) &\approx& - 2 \hat{\mC} \hat{\mB} \cdot ( \mB_\epsilon ( \tau ) - \mC_\epsilon^\top ( \tau ) )
+%\text{\,,} \\
+%\tfrac{d}{d \tau} ( \mB_\epsilon ( \tau ) + \mC_\epsilon^\top ( \tau ) ) &\approx& ~~~ 2 \hat{\mC} \hat{\mB} \cdot ( \mB_\epsilon ( \tau ) + \mC_\epsilon^\top ( \tau ) )
+%\text{\,.}
+%\end{eqnarray*}
+Since $\hat{\mC} \hat{\mB} > 0$ (follows from the teacher parameters being balanced and non-degenerate), the entries of $\mB_\epsilon ( \tau ) - \mC_\epsilon^\top ( \tau )$ shrink exponentially fast while those of $\mB_\epsilon ( \tau ) + \mC_\epsilon^\top ( \tau )$ grow at the same rate.
+This exponential shrinkage/growth leads $\| \mB_\epsilon ( \tau ) - \mC_\epsilon^\top ( \tau ) \| \big/ \| \mB_\epsilon ( \tau ) + \mC_\epsilon^\top ( \tau ) \|$ to become extremely small, more so the smaller $\epsilon$ is.
+%
+% OLD PROOF SKETCH:
+%The proof involves bounding the differential equations characterizing $\mC^\top + \mB$ and $\mC^\top - \mB$, and showing that their dynamics at initialization are governed by the dominating terms of the gradients. Both terms turn out to be exponential, with the term corresponding to $\mC^\top + \mB$ having an exponent of the same sign as $\hat{\mC}\hat{\mB}$, and the term corresponding to $\mC^\top - \mB$ having an exponent of the opposite sign.
+%s of opposite signs, and include the term  which determines which term will decay and which will grow. 
+%We then show that there exists a time for which the two terms are separated by an order of magnitude. Finally, taking $\epsilon\rightarrow 0$, we have that the limit is unbounded.
+\end{sproof}

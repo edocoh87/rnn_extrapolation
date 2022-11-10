@@ -1,0 +1,586 @@
+\section{Deferred Proofs}\label{apdx:a}
+Here we provide complete proofs for the results in the paper.
+
+\subsection{Auxilary Proofs}
+In this section we provide missing proofs from the main paper and additional lemmas to be used in the main proofs.
+\subsubsection{Population Loss}
+
+\begin{lemma}[\textbf{Proof of \Eqref{eq:population_loss}}]\label{lemma:expected_loss}
+Assume $\vx\sim \mathcal{D}$ such that $\E_{\vx\sim\mathcal{D}}[\vx]=0, \E_{\vx\sim\mathcal{D}}[\vx\vx^\top]=\mI_k \in \R^{k,k}$, where $\mI_k$ is the identity matrix. $y$ is given by $y=\widehat{RNN}(\vx)$ where $\widehat{RNN}(\cdot)$ denotes the output of a teacher RNN, $\hat{\Theta}=(\hat{\mA}, \hat{\mB}, \hat{\mC})$. Denote $w_i=\hat{\mC}\hat{\mA}^i\hat{\mB}$, the loss for the student RNN satisfies:
+
+\begin{equation}\label{eq:apdx:pop_loss}
+    \E_{\vx\sim\mathcal{D}}\left[\ell\left( RNN\left(\vx\right), y\right)\right] = \sum_{i=0}^{k-1} \left( \mC\mA^i\mB - w_i \right)^2.
+\end{equation}
+
+\end{lemma}
+
+\begin{proof}[\textbf{Proof of Lemma~\ref{lemma:expected_loss}}]
+The population loss for training with sequences of length $k$ is
+
+\begin{equation}
+    \E_{\vx\sim\mathcal{D}}\left[\ell\left( RNN\left(\vx\right), y\right)\right]=\E_{\vx\sim\mathcal{D}}\left[ \left(\sum_{i=0}^{k-1}\mC\mA^{k-1-i}\mB \evx_i - \sum_{j=0}^{k-1}w_{k-1-j} \evx_j\right)^2 \right].
+\end{equation}
+
+Reversing the order of summation, expanding the terms,
+
+\begin{align}
+    \E_{\vx\sim\mathcal{D}}&\left[\ell\left( RNN\left(\vx\right), y\right)\right]=\E_{\vx\sim\mathcal{D}}\left[ \left(\sum_{i=0}^{k-1}\mC\mA^{i}\mB \evx_{k-1-i} - \sum_{j=0}^{k-1}w_{j} \evx_{k-1-j}\right)^2 \right] \\ &=  \sum_{i, j=0}^{k-1} \left[ \mC\mA^i\mB \mC\mA^j\mB -2\mC\mA^i\mB  w_j +  w_i w_j \right] \E_{\vx\sim\mathcal{D}}\left[\evx_{k-1-i} \evx_{k-1-j}\right] \\
+    &=  \sum_{i, j=0}^{k-1} \left[ \mC\mA^i\mB \mC\mA^j\mB -2\mC\mA^i\mB  w_j +  w_i w_j \right] \1_\mathrm{k-1-i = k-1-j} \\ &=  \sum_{i, j=0}^{k-1} \left[ \mC\mA^i\mB \mC\mA^j\mB -2\mC\mA^i\mB  w_j +  w_i w_j \right] \1_\mathrm{i = j}
+    \\ &=  \sum_{i =0}^{k-1} \left[ (\mC\mA^i\mB)^2 -2\mC\mA^i\mB  w_i +  w_i^2 \right] =  \sum_{i=0}^{k-1} \left( \mC\mA^i\mB - w_i \right)^2.
+\end{align}
+where the transition from the second to third rows is by our assumption that $\E_{\vx\sim\mathcal{D}}[\evx_i\evx_j]=\1_\mathrm{i=j}$.
+Therefore we have,
+
+\begin{equation}
+    \E_{\vx\sim\mathcal{D}}\left[ \ell\left( RNN\left(\vx\right), y\right)\right]=  \sum_{i=0}^{k-1} \left( \mC\mA^i\mB - w_i \right)^2.
+\end{equation}
+concluding the proof.
+\end{proof}
+
+\subsubsection{Perfect Generalization and Failed Extrapolation}\label{sec:apdx:perfect_generalization_failed_extrapolation}
+
+\begin{proposition}[Proposition~\ref{prop:symmetric_lds_expressivity} in main paper]
+Assume $d > k$, and let $\epsilon \geq 0$ and $q \in \{ k + 1 , k + 2 , \ldots\}$.
+Then, for any teacher parameters \smash{$\hat{\Theta}$}, there exist student parameters $\Theta$ with which the population loss in \Eqref{eq:population_loss} equals zero, and yet the student does \emph{not} $\epsilon$-extrapolate with horizon $q$.
+\end{proposition}
+
+\begin{proof}
+    Consider a student, $\Theta$, such that $\mA$ is symmetric (and therefore has an orthogonal eigendecomposition). Denote $\mA=\mU\mLambda \mU^\top$. The impulse response at time step $i$ can be expressed as $\mC\mA^i\mB=\mC\mU\mLambda^i \mU^\top \mB$. The latter can be written compactly in matrix form as $\mV\vg$ where $\mV$ is the Vandermonde matrix with $diag(\mLambda)$ as its values,
+    \begin{equation*}
+        \mV=\begin{pmatrix}
+            1 & 1 & \dots & 1\\
+            \lambda_1 & \lambda_2 & \dots & \lambda_d\\
+            \lambda_1^2 & \lambda_2^2 & \dots & \lambda_d^2\\
+            \vdots & \vdots & & \vdots \\
+            \lambda_1^{d-1} & \lambda_2^{d-1} & \dots & \lambda_d^{d-1}\\
+        \end{pmatrix},
+    \end{equation*}
+    and $\vg$ is defined as $\vg\equiv (\mC\mU)^\top\circ \mU^\top \mB$.\footnote{Here $\circ$ denotes the Hadamard (elementwise) product.} A known result on square Vandermonde matrices is that they are invertible if and only if $\lambda_i\neq \lambda_j,\; \forall i\neq j$. Given a fixed set of distinct values $(\lambda_1,\dots,\lambda_d)$ and an arbitrary impulse response $\vr\in\mathbb{R}^d$, in order for the student to generate the impulse response $\vr$ (i.e. $\mV\vg=\vr$), one can set the coefficient vector, $\vg=\mV^{-1}\vr$ and end up with a symmetric student with $\vr$ as its impulse response of length $d$.
+    
+    Consider a teacher RNN, $\hat{\Theta}=\left(\mA,\mB,\mC\right)$, we can set and the first $k$ entries of $\vr$ to $ \evr_i=\hat{\mC}\hat{\mA}^{i-1}\hat{\mB},\; \forall i=\{1,\dots,k\}$. We are therefore left with $d-k$ degrees of freedom which yields many different students that correspond to the first $k$ entries of the teacher while fitting arbitrary values beyond the $k$.
+\end{proof}
+
+\subsubsection{Equivalence Between Balanced RNNs with Symmetric and Diagonal Transition Matrices}
+\begin{lemma}\label{lemma:equiv_diagonal_rnn}
+A balanced RNN, $\Theta=(\mA,\mB,\mC)$, with a symmetric transition matrix (i.e. $\mB=\mC^\top$ and $\mA=\mA^\top$) has an equivalent (i.e. generating the same impulse response) RNN, $\Theta'=(\mA',\mB',\mC')$, which is balanced and its transition matrix is diagonal.
+\end{lemma}
+
+Lemma~\ref{lemma:equiv_diagonal_rnn} allows alternating between systems with symmetric and diagonal matrices. This is useful to simplify the analysis in \Secref{sec:analysis}.
+
+\begin{proof}[\textbf{Proof of Lemma~\ref{lemma:equiv_diagonal_rnn}}]
+    Any symmetric matrix admits an orthogonal eigendecomposition with real (non-imaginary) eigenvalues. Denote $\mA=\mU\mLambda\mU^\top$. We can define
+\begin{equation*}
+    % \label{eq:lin_rnn}
+    \mA'=\mLambda,
+    \quad
+    \mB'=\mU^\top \mB
+    \quad
+    \text{ and }
+    \quad
+    \mC'=\mC\mU,
+\end{equation*}
+The $i^{th}$ index of the impulse response is given by  
+\begin{equation*}
+    \mC\mA^i\mB=\mC\mU\mLambda^i\mU^\top\mB=\mC'\left(\mA'\right)^i\mB'
+\end{equation*}
+concluding that $\Theta$ and $\Theta'$ have the same impulse response of any length.
+\end{proof}
+
+\subsubsection{Gradient Derivation}\label{sec:grad_derivation}
+For completeness and \Secref{sec:apdx:bias_to_symmetry}, we compute the gradients for the general setting.
+\begin{lemma} \label{lemma:gradients}
+Given the population loss
+\begin{equation}
+\mathcal{L}(\mA,\mB,\mC)=\sum_{j=0}^{k-1} \left(\mC\mA^j \mB-\hat{\mC}\hat{\mA}^j\hat{\mB}\right)^2
+    \text{\,.}\tag{\ref{eq:population_loss} revisited}
+\end{equation}
+Denote $\nabla \ell_i = \mC\mA^i\mB-w_i$, the derivatives of the loss with respect to $\mB$, and $\mC$ satisfy:
+
+% \begin{equation}
+%     \frac{\partial \mathcal{L}}{\partial \mA} = \sum_{i=0}^{k-1} \nabla \ell_i \sum_{r=0}^{i-1} (\mA^\top)^r \mC^\top \mB^\top (\mA^\top)^{i-r-1},
+% \end{equation}
+
+\begin{equation}
+    \frac{\partial \mathcal{L}}{\partial \mB} = \sum_{i=0}^{k-1} \nabla \ell_i (\mA^i)^\top \mC^\top,
+\end{equation}
+
+\begin{equation}
+    \frac{\partial \mathcal{L}}{\partial \mC} = \sum_{i=0}^{k-1} \nabla \ell_i \mB^\top \left(\mA^i\right)^\top.
+\end{equation}
+
+
+\end{lemma}
+
+\begin{proof}[\textbf{Proof of Lemma~\ref{lemma:gradients}}]
+Here, we will compute the gradient of the population loss.
+
+Note that for $j\ge 0$, the derivative of $\mC\mA^j\mB$ w.r.t to $\mB$ is given by
+\begin{equation}\label{eq:apdx:dB}
+    \frac{\partial (\mC\mA^j\mB)}{\partial \mB}=(\mA^j)^\top\mC^\top.
+\end{equation}
+%
+Similarly, the derivative of $\mC\mA^j\mB$ w.r.t to $\mC$ is given by
+\begin{equation}\label{eq:apdx:dC}
+    \frac{\partial (\mC\mA^j\mB)}{\partial \mC}=\mB^\top(\mA^j)^\top.
+\end{equation}
+%
+% The derivative of $\mC\mA^j\mB$ w.r.t to $\mA$ is given by
+% \begin{equation}\label{eq:apdx:dA}
+%     \frac{\partial (\mC\mA^j\mB)}{\partial \mA}= \sum_{r=0}^{j-1} (\mA^\top)^r \mC^\top \mB^\top (\mA^\top)^{j-r-1}.
+% \end{equation}
+%
+Using these derivatives, we can calculate the derivative of the population loss, (assigning $w_i=\hat\mB\hat{\mA}^i\hat{\mC}$),
+% Recall that the population loss is given by:
+\begin{equation}
+    \mathcal{L} = \E_{\vx\sim\mathcal{D}}\left[ \ell\left( RNN\left(\vx\right), y\right)\right]=  \sum_{i=0}^{k-1} \left( \mC\mA^i\mB - w_i \right)^2.
+\end{equation}
+%
+Denoting $\nabla \ell_i = \mC\mA^i\mB-w_i$, and noting that $w_i$ is constant (depends on \smash{$\hat{\Theta}$}), we have for $\mX \in \{\mB, \mC\}$:
+\begin{equation}
+    \frac{\partial \mathcal{L}}{\partial \mX} =  \sum_{i=0}^{k-1} \frac{\partial\left( \mC\mA^i\mB - w_i \right)^2}{\partial \mX} = \sum_{i=0}^{k-1} \nabla \ell_i \frac{\partial\left( \mC\mA^i\mB - w_i \right)}{\partial \mX} = \sum_{i=0}^{k-1} \nabla \ell_i \frac{\partial\left( \mC\mA^i\mB \right)}{\partial \mX}.
+\end{equation}
+
+Plugging in \Eqref{eq:apdx:dB} and \Eqref{eq:apdx:dC}, we have:
+% Plugging in the values previously found for $\frac{\partial\left( CA^iB \right)}{\partial B}, \frac{\partial\left( CA^iB \right)}{\partial C}, \frac{\partial\left( CA^iB \right)}{\partial A}$, we have:
+\begin{equation}
+    \frac{\partial \mathcal{L}}{\partial \mB} = \sum_{i=0}^{k-1} \nabla \ell_i \frac{\partial\left( \mC\mA^i\mB \right)}{\partial \mB} = \sum_{i=0}^{k-1} \nabla \ell_i (\mA^i)^\top \mC^\top,
+\end{equation}
+
+\begin{equation}
+    \frac{\partial \mathcal{L}}{\partial \mC} = \sum_{i=0}^{k-1} \nabla \ell_i \frac{\partial\left( \mC\mA^i\mB \right)}{\partial \mC} = \sum_{i=0}^{k-1} \nabla \ell_i \mB^\top(\mA^i)^\top,
+\end{equation}
+
+% \begin{equation}
+%     \frac{\partial \mathcal{L}}{\partial \mA} = \sum_{i=0}^{k-1} \nabla \ell_i \frac{\partial\left( \mC\mA^i\mB \right)}{\partial \mA} = \sum_{i=0}^{k-1} \nabla \ell_i \sum_{r=0}^{i-1} (\mA^\top)^r \mC^\top \mB^\top (\mA^\top)^{i-r-1}.
+% \end{equation}
+
+\end{proof}
+
+
+\subsubsection{Lemma~\ref{lemma:balanced} (Conservation of Balancedness)}\label{sec:lemma_balanced_proof}
+
+\begin{lemma} \textbf{[Lemma \ref{lemma:balanced} in main paper]}
+When optimizing \eqref{eq:population_loss} with GF emenating from a balanced initialization $\Theta(0)$, the parameters $\Theta(\tau)$ are balanced for all $\tau \in \mathbb{R}_+$.
+\end{lemma}
+
+We prove the above result by first showing it for gradient descent and then translating the result to gradient flow. The gradient descent result is stated below, and generalizes a result that was shown in \cite{cohen2022extrapolation} for the memoryless case.
+
+\begin{lemma}\label{lemma:gd_invariance}
+When optimizing \eqref{eq:population_loss} with GD with balanced initial conditions, then $\forall t\in\mathbb{N}$, $\Theta$ has a balanced weight configuration, i.e. $\mB_t=\mC_t^\top$.
+\end{lemma}
+
+\begin{proof}[\textbf{Proof of Lemma~\ref{lemma:gd_invariance}}]
+We prove by induction. By our assumption, the condition holds for $t=0$. Assume $\mB_t=\mC_t^\top$, our goal is to show the conditions hold for $(\mB_{t+1},\mC_{t+1})$.
+In order to show that $\mB_{t+1}=\mC_{t+1}^\top$, we only need to show that $\frac{\partial \mathcal{L}}{\partial \mB_t}=\left( \frac{\partial \mathcal{L}}{\partial \mC_t} \right)^\top$. Writing the gradients (Lemma~\ref{lemma:gradients}), we have
+\begin{equation}
+    \left(\frac{\partial\mathcal{L}}{\partial \mC_t}\right)^\top = \sum_{i=0}^{k-1}\nabla\ell_i \mA_t^i\mB_t =\sum_{i=0}^{k-1}\nabla\ell_i (\mA_t^\top)^i \mC_t^\top= \frac{\partial\mathcal{L}}{\partial \mB_t},
+\end{equation}
+where the inequality follows from the induction assumption and the symmetric structure of $\mA_t$. To conclude, the gradients at time $t$ are the same and $\mB_t=\mC_t^\top$ by the induction assumption, arriving at
+\begin{equation}
+    \mB_{t+1}=\mB_t-\eta\frac{\partial\mathcal{L}}{\partial \mB_t}=\mC_t^\top - \eta \left(\frac{\partial\mathcal{L}}{\partial \mC_t}\right)^\top=\mC_{t+1}^\top
+\end{equation} 
+\end{proof}
+
+
+The proof of Lemma \ref{lemma:balanced} follows from Lemma \ref{lemma:gd_invariance} and the fact that for sufficiently small step size GD approximates GF with arbitrary precision  \citep[see Theorem 3 in][]{elkabetz2021continuous}.
+
+\subsubsection{Conservation of difference of norms}
+
+\Appref{sec:lemma_balanced_proof} shows that if weights are initialized to be balanced, this property is conserved throughout optimization. Here we show under standard initialization schemes, the difference between the norms of $\mB$ and $\mC$ is also conserved.
+% Also for the non-balanced case, we have:
+
+\begin{lemma}\label{lemma:preserve_norm_diff}
+The difference between the norms of $\mB$, $\mC$ is conserved throughout GF, i.e.,
+\begin{equation}
+    \frac{d}{dt}\left(\|\mB\|^2 -  \|\mC\|^2 \right) = 0.
+\end{equation}
+\end{lemma}
+
+\begin{proof}[\textbf{Proof of Lemma~\ref{lemma:preserve_norm_diff}}]
+We wish to prove that the difference between the norms is conserved over time.
+Consider the following expression:
+\begin{equation}
+    \alpha \equiv \|\mB\|^2-\|\mC\|^2 = \mB^\top \mB - \mC\mC^\top.
+\end{equation}
+With this notation, we just need to prove that $\dot{\alpha} = 0$.
+The derivative of $\mB$, $\mC$ with respect to time is given by,
+\begin{equation}
+\label{eq:b_dot_def}
+    \dot{\mB}=-\sum_{i=0}^{k-1}\nabla \ell_i (\mA^\top)^i \mC^\top,
+\end{equation}
+\begin{equation}
+\label{eq:c_dot_def}
+\dot{\mC} = -\sum_{i=0}^{k-1}\nabla \ell_i \mB^\top (\mA^\top)^i.
+\end{equation}
+%
+Using the interchangeability of derivative and transpose, we have:
+%
+\begin{equation}
+    \dot{\alpha} = \dot{\mB^\top}\mB + \mB^\top \dot{\mB} - \dot{\mC}\mC^\top - \mC \dot{\mC^\top} = 2\mB^\top \dot{\mB} -2\dot{\mC} \mC^\top.
+\end{equation}
+%
+Plugging \eqref{eq:b_dot_def} and \eqref{eq:c_dot_def}, we get
+\begin{align}
+\dot{\alpha} = 2 \mB^\top \left(- \sum_{i=0}^{k-1} \nabla \ell_i (\mA^\top)^i \mC^\top \right) -2\left(-\sum_{i=0}^{k-1}\nabla \ell_i \mB^\top (\mA^\top)^i\right) \mC^\top \\
+    = -2\left[ \mB^\top \left( \sum_{i=0}^{k-1} \nabla \ell_i (\mA^\top)^i \right)\mC^\top -\mB^\top\left(\sum_{i=0}^{k-1}\nabla \ell_i  (\mA^\top)^i\right) \mC^\top \right] = 0.
+\end{align}
+establishing that $\frac{d}{dt}\left(\|\mB\|^2-\|\mC\|^2\right)=0$.
+
+\end{proof}
+
+\subsection{Lemma~\ref{lemma:exact_extrapolation} (Exact Extrapolation)}\label{sec:exact_extrapolation_proof}
+
+
+\begin{lemma}\textbf{[Lemma \ref{lemma:exact_extrapolation} in main paper]} 
+\label{lemma:exact_extrapolation_appendix}
+Suppose that $d > k > 2\hat{d}$, the teacher is balanced, and that the student parameters $\Theta$ are balanced and satisfy $\mathcal{L} ( \Theta ) = 0$. Then $\Theta$ extrapolates.
+\end{lemma}
+\begin{proof}[\textbf{Proof of Lemma~\ref{lemma:exact_extrapolation_appendix}}]
+By Lemma~\ref{lemma:equiv_diagonal_rnn}, a balanced RNN with symmetric transition matrix has an equivalent (generating the same impulse response) balanced RNN with a diagonal transition matrix. We will continue under the assumption of diagonal transition matrices. 
+
+Without loss of generality we assume $\hat{\mC}\hat{\mB}=1$. Otherwise, the problem can be rescaled by $\hat{\mC}\hat{\mB}$, which is equivalent to rescaling the initial conditions, and providing no additional information.\footnote{The case for which $\hat{\mC}\hat{\mB}=0$ is handled separately.}
+
+From the balanced assumption, we have $\hat{\mC}^\top=\hat{\mB}$. Denote $\hat{\vp} = \hat{\mC}^\top \odot \hat{\mB}=\hat{\mB}\odot \hat{\mB}$, and we get $\hat{\evp}_i\geq 0$ and $\sum_i \hat{\evp}_i=1$,  and therefore $\hat{\vp}$ may be interpreted as a distribution over a random variable with $\hat{d}$ possible values. We shall assume that these values are $\hat{\emA}_1,\ldots,\hat{\emA}_{\hat{d}}$, and denote the corresponding random variable by $Z$.
+
+Furthermore, we can also interpret elements of the impulse response of $\hat{\Theta}$ as moments of this distribution.
+Let us write the $n^{th}$ element of the impulse response as:
+\begin{equation}
+\hat{\mC} \hat{\mA}^n \hat{\mB} = \sum_i \hat{\evp}_i \hat{a}_i ^n = \E_{\hat{\vp}}[\hat{Z}^n],
+\end{equation}
+where $\E_{\vp}[Z]$ is the expected value of a random variable $Z$ under the distribution $\vp$.
+In the same way, we can define for the learned model $\Theta$, a distribution $p_i = {C}_i {B}_i$, and write the learned impulse response as:
+\begin{equation}
+\mC \mA^n \mB = \sum_i {p}_i a_i ^n = \mathbb{E}_{\vp}[{Z}^n].
+\end{equation}
+This view provides us with a moment matching interpretation of the learning problem. Namely, the fact that $\Theta$ matches the first $k$ elements of the teacher impulse response, is the same as saying they agree on the first $k-1$ moments $\mathbb{E}_{\vp}[{Z}^j]$ for $j\in\{1,\ldots, k-1\}$.\footnote{Equality of the $0^{th}$ moment ensures the student induces a valid probability, i.e. $\sum_{i}\emC_i\emB_i$=$\sum_{i}\hat{\emC}_i\hat{\emB}_i$=1.} The question of extrapolation is whether equality in the first $k-1$ moments implies an equality in all other moments.
+
+
+ In \cite[Theorem 1]{cohen2011use}  and in \cite[Lemma 4]{wu2020optimal} it is shown that the first $2\hat{d}$ moments of a discrete random variable taking at most $\hat{d}$ different values uniquely define this random variable. Therefore, any other discrete random variable identifying with the teacher on $2\hat{d}$ moments must be the same random variable and therefore identifies on higher moments as well. Since we assumed $k > 2\hat{d}$, this result immediately implies that equality in the first $k-1$ moments implies equality in all other moments.
+
+ For the case $\hat{\mC}\hat{\mB}=0$, from our assumption that the teacher is balanced, we have that the condition is met only if $\hat{\emC}_i=\hat{\emB}_i=0$ for $i=1,\dots,\hat{d}$. Such a teacher has an impulse response of zeros, for $k\ge 1$, a student minimizing the loss must also satisfy $\mC\mB=0$ and therefore has the zeros as its impulse response thus extrapolating with respect to the said teacher.
+
+\end{proof}
+
+
+\subsection{Theorem~\ref{thm:main_result} (Approximate Extrapolation)}\label{sec:apdx:approx_extrapolation}
+This section is devoted to the proof of Theorem~\ref{thm:main_result} which ties the approximation error of optimization to that of extrapolation. Lemma~\ref{lemma:proximity_to_solution_small_loss} below shows that if the parameters are within close proximity to an extrapolating solution, the generalization error (i.e. loss values) are small. 
+%First, we prove that given a bound on $\|\Theta-\Theta^*\|<\delta$, we can bound $\mathcal{L}(\Theta)$.
+
+\begin{lemma}\label{lemma:proximity_to_solution_small_loss}
+    Assume $\| \mX - \mX^*\|_\infty < \delta$ for $\mX\in\{\mA,\mB,\mC\}$, and $\Theta^*=(\mA^*,\mB^*,\mC^*)$ is an extrapolating solution (with $\mathcal{L}(\Theta^*)=0)$. Then, there exists a constant depending on $k$ and $\Theta^*$, $c(k, \Theta^*)$, such that $\mathcal{L}(\Theta)\le c \delta^2$.
+\end{lemma}
+
+\begin{proof}[\textbf{Proof of Lemma~\ref{lemma:proximity_to_solution_small_loss}}]
+First we note that $\Theta^*$ attains zero loss and is an extrapolating with respect to the teacher $\hat{\Theta}$, specifically,
+\begin{equation}
+    \mC^*(\mA^*)^i\mB=\hat{\mC}\hat{\mA}^i\hat{\mB},\; \forall i=0,1,\dots\text{ ,}
+\end{equation}
+From the above, the loss can be written with respect to $\Theta^*$ instead of $\hat{\Theta}$, i.e.
+\begin{equation}
+    \mathcal{L}(\mA,\mB,\mC)=\sum_{j=0}^{k-1} \left(\mC\mA^j \mB-\mC^*(\mA^*)^j\mB^*\right)^2
+    \text{\,.}
+\end{equation}
+Denote by $\vl\in\R^k$ the residuals vector with respect to $\Theta^*$, i.e. $\evl_i\equiv\mC\mA^i\mB-\mB-\mC^*(\mA^*)^i\mB^*$. With these notations, the loss amounts to $\mathcal{L}(\mA,\mB,\mC)=\|\vl\|^2$.
+
+From equivalence of norms, we have that for $\vv\in\R^n$, $\|\vv\|_{\infty}\le\|\vv\|_2\le\sqrt{n}\|\vv\|_{\infty}$. The latter means that bounding $\|\vv\|_{\infty}$ will provide the desired bound on the loss with a factor of $\sqrt{k}$.
+
+Recall that $\Theta^*$ is fixed, specifically, $\|\mX^*\|$ is bounded by some constant $m_{\mX^*}$ for $\mX\in\{\mA,\mB,\mC\}$. Denote $m\equiv\max\{m_{\mA^*}, m_{\mB^*}, m_{\mC^*},1 \}$, the $i^{th}$ entry of $\vl$ can be bounded by
+% From our assumption that $\|\mX-\mX^*\|<\delta$ (and the fact that $\mX^*$ is constant), $\|\mX\|$ is bounded, denote such a bound by $m_{\mX}$ for $\mX\in\{\mA,\mB,\mC\}$. Finally, denote $m\equiv\max\{m_{\mA}, m_{\mB}, m_{\mC},1 \}$. 
+
+\begin{align}
+    \left|\mC\mA^{i-1}\mB-\mC^*(\mA^*)^{i-1}\mB^*\right| & = \left|(\mC-\mC^*+\mC^*)\mA^{i-1}\mB-\mC^*(\mA^*)^{i-1}\mB^*\right|\\
+    & \le \left|\mC^*\left(\mA^{i-1}\mB-(\mA^*)^{i-1}\mB^*\right)\right|+\left|(\mC-\mC^*)\mA^{i-1}\mB\right|\\
+    & \le m\left\|\mA^{i-1}\mB-(\mA^*)^{i-1}\mB^*\right\|+\delta\left\|\mA^{i-1}\mB\right\|
+\end{align}
+
+From Cauchy-Schwarz inequality, the RHS satisfies $\delta\|\mA^{i-1}\mB\|\le \delta\|\mA\|^{i-1}\|\mB\|\le \delta(m+\delta)^i$. The last transition uses, 
+\begin{equation}
+    \|\mX\|=\|\mX-\mX+\mX^*\|\le \|\mX-\mX^*\|+\|\mX^*\| \le\delta + m
+\end{equation}
+for $\mX\in\{\mA,\mB\}$.
+
+In a similar manner, the LHS can be bounded by
+\begin{align}
+    \left\|\mA^{i-1}\mB-(\mA^*)^{i-1}\mB^*\right\|& =\left\|\mA^{i-1}\mB-\mA^{i-1}\mB^*+\mA^{i-1}\mB^*-(\mA^*)^{i-1}\mB^*\right\|\\
+    & \le \underbrace{\|\mA\|^{i-1}\|\mB-\mB^*\|}_{\delta (m+\delta)^{i-1}}+\|\mA^{i-1}-(\mA^*)^{i-1}\|\|\mB^*\|
+\end{align}
+again, we have used the triangle inequality and Cauchy-Schwarz inequality. In order to deal with $\|\mA^{i-1}-(\mA^*)^{i-1}\|$, we make use of the equality $x^n-y^n=(x-y)(x^{n-1}+x^{n-2}y+x^{n-3}y^2+\dots+xy^{n-2} y^{n-1}$.
+
+Assigning $\mA$ and $\mA^*$, we have
+\begin{align}
+    \|\mA^{i-1}-(\mA^*)^{i-1}\| & =\left\|(\mA-\mA^*)\sum_{j=0}^{i-2}\mA^{i-2-j}(\mA^*)^j\right\|\\
+    & \le \underbrace{\| \mA-\mA^*\|}_{\le \delta}\left\|(\sum_{j=0}^{i-2}\mA^{i-2-j}(\mA^*)^j\right\|\le \delta (i-1)(m+\delta)^{i-2}
+\end{align}
+
+where the last inequality uses,
+\begin{align}
+    \left\|\sum_{j=0}^{i-2}\mA^{i-2-j}(\mA^*)^j\right\| & \le\sum_{j=0}^{i-2}\|\mA\|^{i-2-j}\|\mA^*\|^j \\ 
+    & \le\sum_{j=0}^{i-2}(m+\delta)^{i-2-j}m^j\\
+    & \le\sum_{j=0}^{i-2}(m+\delta)^{i-2}=(i-1)(m+\delta)^{i-2}.
+\end{align}
+
+Plugging all terms back together,
+\begin{equation}
+    |\evl_i|\le m \left( \delta(m+\delta)^{i-1} +\delta (i-1)(m+\delta)^{i-2}m \right) + \delta(m+\delta)^i=O(\delta m^i).
+\end{equation}
+The above is maximized for $i=k$, to result with $\|\vl\|_{\infty}=O(\delta m^k)$.
+
+Plugging back to the bound on the loss, we have
+\begin{equation}
+    \mathcal{L}(\mA,\mB,\mC)=\|\vl\|^2\le k \|\vl\|_{\infty}^2=O(\delta^2 k m^{2k})
+\end{equation}
+When $k$ is small which is the case of interest, $\mathcal{L}(\mA,\mB,\mC)=O(\delta^2)$.
+
+
+% In order to bound the loss, we first show bound each term of 
+% From our assumption, $\| \mX - \mX^*\|_\infty < \delta$ for $\mX\in\{\mA,\mB,\mC\}$. Denote these differences as $\Delta\mA, \Delta\mB$ and $\Delta\mC$ respectively.
+
+
+% Our goal is to translate the 
+% Recall the loss consists of the sum,
+% $\mathcal{L}=\sum_{i=1}^{k-1} \mC\mA^i\mB - \hat{\mC}\hat{\mA}^i\hat{\mB}$
+% Consider the terms 
+
+% \begin{equation}
+%     m\equiv\max_{\mX\in\{ \mA,\mB,\mC \}}\|\mX\|_{\infty}
+% \end{equation}
+
+% Assume:
+% \begin{equation}
+%     \| \Theta - \Theta^*\|_\infty<\delta \Rightarrow \| A - A^*\|_\infty, \| B - B^*\|_\infty, \| C - C^*\|_\infty = \| \Delta A\|_\infty, \| \Delta B\|_\infty, \| \Delta C\|_\infty < \delta.
+% \end{equation}
+
+% We will denote:
+% \begin{equation}
+%     \Upsilon = \max(\|A^*\|_\infty, \|B^*\|_\infty, \|C^*\|_\infty, 1).
+% \end{equation}
+
+% Then, by the triangle inequality and sub-multiplicativity, and assuming $\delta << \Upsilon$, we have:
+% \begin{eqnarray}
+%     \forall i \in [k], \| A^i - \Hat{A}^i\|_\infty &=& \| (\Hat{A}+\Delta A)^i - \Hat{A}^i\|_\infty = \|  \sum_{j=1}^i {i \choose j} (\Delta A)^j (\Hat{A}^{i-j}) \|_\infty \\
+%     &<& (i+1) \delta \Upsilon^{i-1} < (k+1) \delta \Upsilon^{k-1}.
+% \end{eqnarray}
+
+% Decomposing the C component in the impulse response, we have:
+% \begin{align}
+%     \forall i \in [k], &| CA^i B - \Hat{C} \Hat{A}^i \Hat{B} |
+%     = | (C-\Hat{C} +\Hat{C}) A^i B - \Hat{C} \Hat{A}^i \Hat{B} | \\
+%     \leq  &\|  \Hat{C} A^i B - \Hat{C} \Hat{A}^i \Hat{B} \|_\infty + \| (C-\Hat{C}) A^i B \|_\infty \\
+%     \leq  &\|  \Hat{C} A^i B - \Hat{C} \Hat{A}^i \Hat{B} \|_\infty + \delta \| A^i B \|_\infty .
+% \end{align}
+
+% By a similar process for A, B (and using the previous result for $\delta <<\Upsilon$), we get:
+
+% \begin{align}
+%     | CA^i B - \Hat{C} \Hat{A}^i \Hat{B} |
+%     \leq  &\|  \Hat{C} \Hat{A}^i \Hat{B} - \Hat{C} \Hat{A}^i \Hat{B} \|_\infty\\
+%     + &\delta \| A^i B \|_\infty + \delta \| C A^i \|_\infty + (k+1) \delta \Upsilon^{k-1} \| C B \|_\infty +O(\delta^2) \\
+%     \Rightarrow | CA^i B - \Hat{C} \Hat{A}^i \Hat{B} |
+%     \leq &\delta \left( \| A^i B \|_\infty +\| C A^i \|_\infty + (k+1)  \Upsilon^{k-1} \| C B \|_\infty +O(\delta) \right).
+% \end{align}
+
+% By a similar derivation as done for $A^i$, we get:
+% \begin{align}
+%      &\| A^i B \|_\infty =  \| \Hat{A}^i \Hat{B} \|_\infty + (k+2)\delta \Upsilon^k \leq \Upsilon^{k+1} + (k+2)\delta \Upsilon^k = \Upsilon^k (\Upsilon +(k+2) \delta) \\
+%      &\| C A^i \|_\infty =  \| \Hat{C} \Hat{A}^i  \|_\infty + (k+2)\delta \Upsilon^k \leq \Upsilon^k (\Upsilon +(k+2) \delta)) \\
+%      &\| C B \|_\infty =  \| \Hat{C} \Hat{B} \|_\infty + 3\delta \Upsilon < \Upsilon (\Upsilon +3 \delta) \\
+%      &\Rightarrow (k+1)\Upsilon^{k-1} \| C B \|_\infty < (k+1)\Upsilon^{k} (\Upsilon +3 \delta).
+% \end{align}
+
+% Plugging in these values, we get:
+% \begin{equation}
+%     | CA^i B - \Hat{C} \Hat{A}^i \Hat{B} |
+%     \leq \delta \Upsilon^k ((k+3)\Upsilon +O(\delta) )< \delta \Upsilon^{k+1} (k+4).
+% \end{equation}
+
+% Denoting $R_i = CA^i B - \Hat{C}\Hat{A}^i \Hat{B}$, for $i \in [k]$, then:
+% \begin{equation}
+%     \| R \|_\infty \leq \delta \Upsilon^{k+1} (k+4).
+% \end{equation}
+
+% We note, as $\Hat{\Theta}$ is an interpolating solution, it has loss 0. Thus, by common vector norm inequalities:
+% \begin{equation}
+%     \mathcal{L}(\Theta) = 0.5 \|R\|_2^2 < 0.5 k  \|R\|_\infty^2<0.5k(k+4)^2 \Upsilon^{2k+2} \delta^2.
+% \end{equation}
+
+% Treating $C(k, \Hat{\Theta}) = 0.5k(k+4)^2 \Upsilon^{2k+2}$ as constants of the problem, we have:
+% \begin{equation}
+%     \mathcal{L}(\Theta) < C \delta^2.
+% \end{equation}
+
+\end{proof}
+
+
+\begin{theorem}\textbf{[Theorem~\ref{thm:main_result} in main paper]}
+\label{thm:approx_extrapolation}
+Assume the conditions of Theorem~\ref{thm:exact_extrapolation}, and that the teacher parameters~$\hat{\Theta}$ are stable, i.e. the singular values of~\smash{$\hat{\mA}$} are in~$[-1,1]$.
+Assume also that~\smash{$\hat{\Theta}$} are non-degenerate, in the sense that the input-output mapping they realize is not identically zero.
+Then, for any $\epsilon > 0$ and $q \in \mathbb{N}$, there exists $\delta(\epsilon, q) > 0$ which admits the following:
+whenever GF leads the student parameters~$\Theta$ to within (Frobenius) distance $\delta(\epsilon,q)$ from a balanced point~$\Theta^*$ satisfying $\mathcal{L} ( \Theta^* ) = 0$, the student $\epsilon$-extrapolates with horizon~$q$. 
+\end{theorem}
+
+\begin{proof}[\textbf{Proof of Theorem~\ref{thm:approx_extrapolation}}]
+Given a desired approximation error $\epsilon>0$, and horizon $q\in\{k+1,k+2,\dots\}$, our goal is to find $\delta(\epsilon,q)$ such that if $\|\mX-\mX^*\|_F<\delta$ for $\mX\in\{\mA,\mB,\mC\}$, then $|\mC\mA^j\mB-\hat{\mC}\hat{\mA}^j\hat{\mB}|<\epsilon$.
+
+
+
+% By Theorem~\ref{thm:exact_extrapolation}, $\Theta^*$ extrapolates with respect to $\hat{\Theta}$.
+
+First we note that by Theorem~\ref{thm:exact_extrapolation}, $\Theta^*$ is an extrapolating solution with respect to $\hat{\Theta}$ (i.e. $\Theta^*$ and $\hat{\Theta}$ generate identical impulse responses), therefore we can measure extrapolation with respect to $\Theta^*$.
+In a similar manner to Lemma~\ref{lemma:proximity_to_solution_small_loss}, we can define the residual vector $\vl$ such that its $i^{th}$ entry is defined as
+\begin{equation}
+    \evl_i=\mC\mA^{i-1}\mB-\mC^*(\mA^*)^{i-1}\mB^*.
+\end{equation}
+Note that $\Theta$ is initialized balanced and by Lemma~\ref{lemma:balanced}, this property is preserved throughout GF. By Lemma~\ref{lemma:equiv_diagonal_rnn} both $\Theta$ and $\Theta^*$ have equivalent balanced systems \smash{$\bar{\Theta}$} and \smash{$\bar{\Theta}^*$} for which the transition matrices are diagonal. For the sake of readability, we overload notations and carry on under the assumption that $\mA$ and $\mA^*$ are diagonal with entries $\{\emA_1,\dots,\emA_d\}$ and $\{\emA_1^*,\dots,\emA_d^*\}$ on their respective diagonals.
+
+Another observation is that a balanced RNN must satisfy that its first element in the impulse response moment is non-negative ($\mC\mB=\sum c_ib_i=\sum b_i^2\ge 0$). Without loss of generality, we can assume the teacher RNN $\hat{\Theta}$ satisfies $\hat{\mC}\hat{\mB}=1$. Suppose this is not the case, i.e. $\hat{\mC}\hat{\mB}=\eta>0$ (recall we assume the teacher is non-degenerate). One can re-scale $\hat{\mC}$ and $\hat{\mB}$ by a factor of $\eta^{-0.5}$ and result with $\frac{\hat{\mC}\hat{\mA}^{i-1}\hat{\mB}}{\eta}$ on the $i^{th}$ entry of its impulse response. The re-scaled system satisfies $\frac{\hat{\mC}\hat{\mB}}{\eta}=1$ and provides no extra information.
+
+With the claims above, we may interpret $\hat{\Theta}$ as a discrete random variable, i.e. $\hat{\vp}=(\hat{\emC}_1\hat{\emB}_1,\dots, \hat{\emC}_{\hat{d}}\hat{\emB}_{\hat{d}})$ defines a probability vector,\footnote{$\sum \hat{\evp}_i=1$ and $\forall i,\; \hat{\evp}_i\ge 0$} the random variable is assigned the value $\hat{\emA}_i$ with probability $\hat{\evp}_i$. Denote the random variable associated with $\hat{\Theta}$ by $\hat{\rz}$. Recall that $\Theta^*$ is balanced and attains zero loss, hence it also admits the random variable interpretation (denoted as $\rz^*$).
+
+Under the probabilistic perspective, the impulse response of the systems correspond to the moment of the random variables, i.e.
+\begin{equation}
+    \E\left[\hat{\rz}^n\right]=\sum_{i=1}^{\hat{d}} \hat{\evp}_i \hat{\emA}_i^n = \sum_{i=1}^{\hat{d}} \hat{\emC}_i\hat{\emB}_i \hat{\emA}_i^n=\hat{\mC}\hat{\mA}^n\hat{\mB}
+\end{equation}
+
+We can write the loss in terms of the defined residual vector, $\mathcal{L}(\Theta)=\|\vl\|^2$. From Lemma~\ref{lemma:proximity_to_solution_small_loss}, we have $\mathcal{L}(\Theta)=O(\delta^2)$. Specifically, $\|\vl\|\le c\delta^2$ for some constant $c\in\R$. Recall that for $\vv\in\R^n$, $\|\vv\|_{\infty}\le \|\vv\|_2$, applying to our case, we have $\|\vl\|_{\infty}\le \|\vl\|\le \sqrt{c}\delta$.
+
+Specifically, $|\evl_0|\le \|\vl\|_{\infty}\le \sqrt{c}\delta$ and since we assume $\mC^*\mB^*=1$, we have 
+\begin{equation}
+    |\evl_0|=|\mC\mB-\mC^*\mB^*|=|\mC\mB-1|\le \sqrt{c}\delta
+\end{equation}
+which leads to $1-\sqrt{c}\delta\le \mC\mB\le 1+\sqrt{c}\delta$. Denote $\mC\mB=1+\beta$ where $\beta\in\left[-\sqrt{c}\delta,\sqrt{c}\delta\right]$. A re-scaled student introduces a factor $\delta$ into the approximation error, that is
+\begin{align}
+    \left|\frac{\mC\mA^{i-1}\mB}{1+\beta} - \mC^*(\mA^*)^{i-1}\mB^*\right| & =\left|\frac{\mC\mA^{i-1}\mB}{1+\beta} - (1+\beta)\frac{\mC^*(\mA^*)^{i-1}\mB^*}{1+\beta}\right|\\
+    & = \frac{1}{1+\beta}\left| \mC\mA^{i-1}\mB - (1+\beta)\mC^*(\mA^*)^{i-1}\mB^* \right|\\
+    & \le \frac{1}{1+\beta}\left| \mC\mA^{i-1}\mB - \mC^*(\mA^*)^{i-1}\mB^* \right|+\frac{1}{1+\beta}|\beta\mC^*(\mA^*)^{i-1}\mB^*|
+\end{align}
+Recall that $\Theta^*$ is fixed, specifically, $\|\mX^*\|$ is bounded by some constant $m_{\mX^*}$ for $\mX\in\{\mA,\mB,\mC\}$. Denote $m\equiv\max\{m_{\mA^*}, m_{\mB^*}, m_{\mC^*},1 \}$. Combining the latter with Cauchy-Schwarz inequality,
+\begin{equation}
+    \left|\frac{\mC\mA^{i-1}\mB}{1+\beta} - \mC^*(\mA^*)^{i-1}\mB^*\right|\le \frac{1}{1+\beta}|\evl_{i}|+\frac{\beta m^{i+1}}{1+\beta} \le 2|\evl_i|+2\beta m^{i+1}=O(\delta)
+\end{equation}
+where the last inequality uses $0.5<1+\beta$ for $\sqrt{c}\delta<0.5$. Per our claim above, we can assume with out loss of generality that $\mC\mB=1$. A balanced student can thus be interpreted as a discrete random variable with probability vector $\vp$ taking on values $\{\emA_1,\dots,\emA_d\}$ with probability $\evp_i$.
+
+Recall that under the assumption of a stable teacher, we have that for all $i=1,\dots,\hat{d},\; |\hat{\emA}_i|\le 1$. Denote the joint support of $\mA$ and $\hat{\mA}$ by $\sS\equiv \{\emA_i\}_{i=1}^{d}\bigcup \{\hat{\emA}_j\}_{j=1}^{\hat{d}}$, and define $s=\max \{\sS\} - \min \{\sS\}$. By our assumption on convergence and stability of the teacher, we have $s\le 2(1+\delta)$.
+
+From Proposition 2 in \cite{wu2020optimal}, we have that if $|\mC\mA^i\mB-\hat{\mC}\hat{\mA}^i\hat{\mB}|\le \delta$ for $i\in\lbrace 1,\dots,2\hat{d}\rbrace$, then
+\begin{equation}
+    \mathcal{W}_1(\vp,\hat{\vp})=O\left(\delta^{\frac{1}{4\hat{d}}}\right).
+\end{equation}
+
+By \cite[Section 2.3]{panaretos2019statistical}, we can tie the Wasserstein distance to higher order $q^{th}$ Wasserstien distance. For the $s$ defined above, we have that for any $q \in \mathbb{N}$:
+\begin{equation}
+    \mathcal{W}_q^q(\vp, \hat{\vp}) \leq \mathcal{W}_1(\vp, \hat{\vp}) s^{q-1} < (2+2\delta)^{q-1} O(\delta^{\frac{1}{2\hat{d}}}).
+\end{equation}
+
+
+Denote by $m_q(\vp)$ the $q^{th}$ moment of $\vp$, from \cite[Equation 1]{biswas2021bounding}, we have:
+\begin{equation}
+    \left| m_q^q(\vp) - m_q^q(\hat{\vp}) \right| \leq \mathcal{W}_q^q(\vp, \hat{\vp}) \leq (2+2\delta)^{q-1} O(\delta^{\frac{1}{2d^*}}).
+\end{equation}
+
+Recall that the difference in the $i^{th}$ moments of the student and teacher correspond to the difference in the impulse responses. So we have that if $\|\mX-\mX^*\|_F<\delta$ for $\mX\in\{\mA, \mB, \mC\}$ then $\forall q\in\mathbb{N}$,
+\begin{equation}\label{eq:apdx:final_inequality}
+    \left| \vl_q \right|  \leq (2+2\delta)^{q-1} O(\delta^{\frac{1}{2\hat{d}}}).
+\end{equation}
+% In our original context, we have $m_q^q(V) = CA^q B$ and similarly for the teacher.
+
+% Denoting $\epsilon = O(\delta^\frac{1}{2d^*})$, for balanced initialization and $\|\Theta-\Theta^*\|_\infty <\delta$ small enough, we have that the student $\epsilon$-extrapolates to horizon $q$.
+
+% In order to have $\epsilon$-extrapolation up to horizon $q$, we can set $\delta(\epsilon,q)<\left(\frac{\epsilon}{c\cdot (2+2\delta)^{q-1}}\right)^{2\hat{d}}$ and then the RHS of \Eqref{eq:apdx:final_inequality} satisfies $(2+2\delta)^{q-1}c\delta^{\frac{1}{2\hat{d}}}<\epsilon$.
+
+% For the case of $\hat{\mC}\hat{\mB}=0$, the teacher has an impulse response of zeros. By Lemma~\ref{lemma:proximity_to_solution_small_loss} we have for $k\ge 2$ that $\mathcal{L}(\Theta)\le c_2\delta$ (where $c_2$ depends on $k$). In order for the student to $\epsilon$ extrapolate with horizon $q$ we need to show that $|\mC\mA^j\mB|\le \epsilon$ for $j=\{0,\dots,q-1\}$. 
+
+
+% Recall that the teacher is stable, i.e. $\emA_1,\dots,\emA_{\hat{d}}\in[-1,1]$, from our assumption on convergence to an
+
+\end{proof}
+
+% that for the student, $1-\delta\le\mC\mB\le 1+\delta$, denote . We can therefore consider the normalized student for which we divide $\mB$ and $\mC$ by $\sqrt{\mC\mB}$ to arrive at a scaled student. Note that the incurred error is bounded 
+
+
+% Let us assume $\|\Theta-\Theta^*\|<\delta$. By Lemma \ref{lemma:proximity_to_solution_small_loss}, we have $\mathcal{L}(\Theta)<C \delta^2$.\\
+% In addition, we note: 
+% \begin{equation}
+%     \|A\|_\infty < \|A^*\|_\infty + \delta.
+% \end{equation}
+% We remind ourselves that
+% \begin{equation}
+%     \nabla \ell_i = \sum_{j=1}^d z_j a_j^i - \sum_{j=1}^{d^*} z_j^* (a_j^*)^i.
+% \end{equation}
+% In vector terminology, our loss is calculated as:
+% \begin{equation}
+%     \mathcal{L} = 0.5 \| R \|_2^2,
+% \end{equation}
+% where $R \in \mathbb{R}^{k \times 1}$ is a vector s.t. $R[q] = \nabla \ell_{q-1}$.
+
+% By standard results in vector norms, we have:
+% \begin{equation}
+%     \| R \|_\infty \leq \| R \|_2 .
+% \end{equation}
+% Thus:
+% \begin{equation}
+%     0.5 \| R\|_2^2 < C\delta^2 \Rightarrow \|R \|_\infty \leq  \| R \|_2 < \sqrt{2C }\cdot \delta .
+% \end{equation}
+
+% In a similar manner to Lemma \ref{lemma:exact_extrapolation}, we denote the student and teacher by their equivalent random variables:
+% \begin{align}
+%     C A^q B &= \sum_{i=1}^{d} z_i a_i^q, \\
+%     C^* (A^*)^q B^* &= \sum_{i=1}^{d^*} z^*_i (a_i^*)^q.
+% \end{align}
+
+% By this notation, we have that the student's impulse response at time q is equal to the q$th$ moment of the discrete random variable (where the weights do not necessarily sum to 1), denoted as:
+% \begin{equation}
+%     V  = \sum_{i=1}^{d} z_i \delta_{a_i}.
+% \end{equation}
+% In a similar manner, for the teacher:
+% \begin{equation}
+%     V^*  = \sum_{i=1}^{d^*} z^*_i \delta_{a^*_i}(x),
+% \end{equation}
+% where
+% \begin{equation}
+%     \delta_a(x) = \{1, x=a;  0, else\}.
+% \end{equation}
+
+% The student is initialized balanced, thus by Lemma \ref{lemma:balanced}, for $t>0$, it remains balanced.
+
+% We note, $\nabla \ell_0 \leq \| R \|_\infty < \sqrt{2 C}\cdot \delta$. Thus, we can normalize the student to have $\sum_{j=1}^d z_j =1$, and it will introduce $O(\delta)$ to the loss. Thus, we will assume that $\sum_{j=1}^d z_j = \sum_{j=1}^{d^*} z_j^* =1$, and $\mathcal{L}< O(\delta)$.
+
+% By Lemma \ref{lemma:exact_extrapolation}, any balanced solution with $k>2d^*$ extrapolates. Thus, as the loss converges to 0, the student converges to a solution that extrapolates.
+
+% In particular, the student's parameters are bounded. As the extrapolating solution is constant, and the student is bounded to distance $\delta$ in parameter space, we may bound $\|A\|_\infty<\|A^*\|_\infty+\delta$. We will denote the maximal spectral support over teacher and student: $S =max(a_i, 1)-min(a_j, -1)$, for all $a_i, a_j$ in A, $A^*$. Thus, $S< 2(\|A^*\|_\infty+\delta)$.
+
+% Using \cite[Proposition 2]{wu2020optimal}, there is a unique distribution satisfying the moment conditions, and it is equivalently represented by our teacher. Our teacher is stable, discrete, rank $d^*$, $k > 2d^*$, and we have $ \|R\| < O(\delta)$. Thus, we have $\|A^*\|_\infty \leq 1$.
+
+% By \cite[Proposition 2]{wu2020optimal}, we have a bound on the $W_1$ Wasserstein distance between the teacher and the student:
+
+% \begin{equation}
+%     W_1(V, \hat{V}) \leq O(d^* \cdot \delta^{\frac{1}{2d^*}})
+% \end{equation}
+
+% As $d^*$ is a constant of the problem, we further bound:
+% \begin{equation}
+%     W_1(V, \hat{V}) \leq O(\delta^{\frac{1}{2d^*}})
+% \end{equation}
+
+% By \cite[Section 2.3]{panaretos2019statistical}, we have inequality relations between the Wasserstein distances of different orders. For the $S$ found above, we have that for any $q \in \mathbb{N}$:
+% \begin{equation}
+%     W_q^q(V, \hat{V}) \leq W_1 S^{q-1} < (2+2\delta)^{q-1} O(\delta^{\frac{1}{2d^*}}).
+% \end{equation}
+
+
+% We denote by $m_q(V)$ the q$th$ moment of V.
+% By using \cite[Equation 1]{biswas2021bounding}, we have:
+% \begin{equation}
+%     \left| m_q^q(V) - m_q^q(\hat{V}) \right| \leq W_q^q(V, \hat{V}) \leq (2+2\delta)^{q-1} O(\delta^{\frac{1}{2d^*}}).
+% \end{equation}
+% In our original context, we have $m_q^q(V) = CA^q B$ and similarly for the teacher.
+
+% Thus, we get in our terminology: 
+% \begin{equation}
+%     \|\Theta-\Theta^*\|_\infty <\delta  \Rightarrow\forall q \in \mathbb{N}, \left| \nabla \ell_q \right|  \leq (2+2\delta)^{q-1} O(\delta^{\frac{1}{2d^*}}).
+% \end{equation}
+
+% Denoting $\epsilon = O(\delta^\frac{1}{2d^*})$, for balanced initialization and $\|\Theta-\Theta^*\|_\infty <\delta$ small enough, we have that the student $\epsilon$-extrapolates to horizon $q$.
+
+% In order to have $\epsilon$-extrapolation up to horizon $q$, we can set $\delta<\left(\frac{\epsilon}{C\cdot (2+2\delta)^{q-1}}\right)^{2d^*}$ and then the RHS of \eqref{eq:final_inequality} satisfies $S^{p-1}C\delta^{\frac{1}{2d^*}}<\epsilon$.
+% \end{proof}

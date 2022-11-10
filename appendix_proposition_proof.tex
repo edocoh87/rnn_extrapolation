@@ -1,0 +1,517 @@
+\subsection{Proposition~\ref{prop:implicit_bias_for_balanced_init} (Implicit Bias for Balancedness)}
+\label{sec:apdx:bias_to_symmetry} 
+
+The proof of Proposition~\ref{prop:implicit_bias_for_balanced_init} consists of several steps. First, we bound with high probability the norms of $\mB$ and $\mC$ at initialization (Lemma~\ref{lemma:bound_init}). We then derive bounds on the differential equations of $\frac{d}{dt}(\mB(t)+\mC^\top(t))$ and $\frac{d}{dt}(\mB(t)-\mC^\top(t))$ (Lemma~\ref{lemma:Y_and_W_ode}). We show that when the initialization scale tends to zero, the ratio between the differential equations tends to zero. (Lemma~\ref{lemma:upper_bound_in_time}). %Finally, we apply Lemma~\ref{lemma:upper_bound_in_time} to prove our case of Proposition~\ref{prop:implicit_bias_for_balanced_init}.
+
+Before we turn to prove Proposition~\ref{prop:implicit_bias_for_balanced_init}, we first need to bound the initial values for a vector $\vv\in\R^n$ initialized with $\mathcal{N}(0,\frac{\epsilon^2}{n})$.
+
+\begin{lemma}\label{lemma:bound_init}
+    Assume a vector $\vv \in \R^n$ with $\mathcal{N}(0,\frac{\epsilon^2}{n})$ per coordinate. Then:
+
+\begin{equation}
+    Pr\left(\frac{\epsilon}{2}< \|\mathbf{v}\|_2 < \frac{3\epsilon}{2} \right) \geq 1- 2 \exp(-9d/64 ).
+\end{equation}
+\end{lemma}
+
+\begin{proof}[\textbf{Proof of Lemma~\ref{lemma:bound_init}}]
+The proof of \ref{lemma:bound_init} uses known results on the Chi-square distribution \cite{laurent2000adaptive}, applied to our specific setting to achieve the desired bounds.
+We will begin by changing variables, $\tilde{\evv}_i = \evv_i\cdot \frac{\sqrt{n}}{\epsilon}$. The entries $\tilde{\evv}_i$, are standard Gaussian variables. The squared norm of $\tilde{\vv}$ distributes according to the $\chi$-squared distribution.
+
+By \cite[Lemma 1]{laurent2000adaptive}, in our case (plugging in $x= 9n/64$), the following inequalities hold:
+% By Lemma 1 in  [Laurent and P. Massart, 2000] (page 1325) [https://www.jstor.org/stable/2674095
+% ]
+
+\begin{align}
+    &Pr\left(\|\tilde{\vv}\|^2 \geq (1.75 +9/32) n\right) \leq \exp(-9n/64),\\
+    &Pr\left(\|\tilde{\vv}\|^2 \leq d/4\right) \leq \exp(-9n/64).
+\end{align}
+
+We simplify these inequalities. From the first bound:
+\begin{equation}
+    Pr\left(\|\tilde{\vv}\|^2 \geq 2.25 n\right) \leq \exp(-9n/64) \Longrightarrow Pr\left(\|\tilde{\vv}\| \geq 1.5 \sqrt{n}\right) \leq \exp(-9n/64)
+\end{equation}
+% \begin{align}
+%     &Pr(\|\tilde{\vv}\|_2^2 \geq 2.25 d) \leq \exp(-9d/64) \\
+%     \Rightarrow &Pr(\|\tilde{\vv}\|_2 \geq 1.5 \sqrt{d}) \leq \exp(-9d/64).
+% \end{align}
+
+Changing variables back to $\vv$:
+\begin{equation}
+    Pr\left(\|\vv\| \geq 1.5 \epsilon\right) \leq \exp(-9n/64).
+\end{equation}
+
+Similarly, for the second bound:
+\begin{align}
+    Pr\left(\|\tilde{\vv}\| \leq \sqrt{n}/2\right) \leq \exp(-9n/64)
+    \Longrightarrow Pr\left(\|\vv\| \leq \epsilon/2\right) \leq \exp(-9n/64).
+\end{align}
+
+Taking the complementary probability, we have the desired result of
+\begin{equation}
+Pr\left(\frac{\epsilon}{2}< \|\vv\| < \frac{3\epsilon}{2}\right) \leq 1- 2 \exp(-9n/64 ).
+\end{equation}
+\end{proof}
+
+
+% \begin{lemma}\textbf{[Proposition~\ref{prop:implicit_bias_for_balanced_init} in main paper]} 
+% Consider the case where, without loss of generality, $\hat{C}\hat{B}$~is positive.
+% Denote by $B ( \tau )$ and $C ( \tau )$ the parameters $B$ and~$C$ of the learned RNN at time~$\tau$ of the GF trajectory.
+% Assume that the coordinates of $B(0),C(0)$ are drawn independently from the Gaussian distribution $\mathcal{N}\left(0,\frac{\epsilon^2}{d}\right)$. Then, there exists $\tau \in \mathbb{R}_+$ for which:
+% \begin{equation}
+%     \lim_{\epsilon\rightarrow 0}\frac{\|C^\top(\tau)+ B(\tau)\|^2}{\|C^\top(\tau)- B(\tau)\|^2}=\infty.
+% \end{equation}
+% \end{lemma}
+
+\begin{proposition}\textbf{[Proposition~\ref{prop:implicit_bias_for_balanced_init} in main paper]} 
+Suppose that:
+\emph{(i)}~$d > 4$;
+\emph{(ii)}~the teacher parameters~$\hat{\Theta}$ are balanced and are non-degenerate, in the sense that the input-output mapping they realize is not identically zero;
+and 
+\emph{(iii)}~the student parameters are learned by applying GF to the loss~$\mathcal{L} ( \cdot )$.
+Let $\tilde{\Theta}$ be a random point in parameter space, with entries drawn independently from the standard normal distribution.
+For $\epsilon > 0$, consider the case where GF emanates from the initialization~$\epsilon \tilde{\Theta}$, and denote the resulting curve by $\Theta_\epsilon ( \tau ) = ( \mA_\epsilon ( \tau ) , \mB_\epsilon ( \tau ) , \mC_\epsilon ( \tau ) )$, with $\tau \geq 0$.
+Then, w.p. at least~$0.75$, for every $\epsilon > 0$ there exists $\tau_\epsilon \geq 0$ such that:
+\begin{equation}
+    \lim_{\epsilon\rightarrow 0^+}\frac{||\mB_{\epsilon}(\tau_\epsilon) - \mC_{\epsilon}^\top(\tau_\epsilon) ||_F}{||\mB_{\epsilon}(\tau_\epsilon) + \mC_{\epsilon}^\top(\tau_\epsilon) ||_F}=0
+    \text{\,.}
+\end{equation}
+
+\end{proposition}
+
+The consequence of Proposition \ref{prop:implicit_bias_for_balanced_init} is that as $\epsilon$ converges to zero, $\mB$ and $\mC$ converge towards each other. 
+
+For convenience, we refer to the mentioned initialization scheme (where every coordinate in a vector is initialized as $\mathcal{N}\left(0,\frac{\epsilon^2}{d}\right)$) as \textit{\textbf{$\epsilon$-normal initialization}}.
+In order to prove the proposition we define a few relevant terms, 
+% We note the above initialization as $\epsilon$-normal initialization, and denote:
+\begin{equation}
+    Y = \mB - \mC^\top,\qquad W = \mB + \mC^\top,\qquad w_0=\hat{\mC}\hat{\mB}.
+\end{equation}
+ We will in fact prove the stronger, following lemma, for any matrix $\mA$, not necessarily symmetric.
+
+\begin{lemma}\label{thm:convergence_to_symmetric_configuration}
+Assume $w_0>0$, and $\mA,\mB,\mC$ are $\epsilon$-normally initialized. Then $\exists t$ such that 
+\begin{equation}
+ \lim_{\epsilon\rightarrow 0}\frac{\|Y(t)\|^2}{\|W(t)\|^2}=0   ,\hspace{1cm} \lim_{\epsilon\rightarrow 0}\frac{\|\mA(t)\|_F^2}{\|W(t)\|^2}=0.
+\end{equation}
+\end{lemma}
+
+
+The proof of Lemma \ref{thm:convergence_to_symmetric_configuration} follows three steps. (I) We show that there is a time in the optimization in which the norms of all parameters are bounded (Lemma \ref{lemma:upper_bound_in_time}); (II) we derive upper (and lower) bounds for the differential equations describing the evolvement of $Y,W$ and $\mA$. Our approximations are limited to the initial phase of training. Concretely, we show that for $0\le t\le \frac{1}{2w_0}\ln{\left(\frac{1}{\epsilon^{0.5}} \right)}$, all norms are bounded. Thus, it is possible to obtain meaningful bounds on the ODEs of $Y$ and $W$ while $\mA$ remains in the magnitude of initialization. (III) Using the relevant bounds, we show that 
+
+
+\begin{lemma}\label{lemma:upper_bound_in_time}
+Assume $\epsilon$-initialization and bounded teacher. Then, for all $0\leq t \leq \frac{1}{2w_0}\ln{\left( \frac{1}{\epsilon^{0.5}}\right)}$, there exist $M_1, M_2$ such that:
+\begin{equation}
+    \|\mC(t)\|, \|\mB(t)\| < M_1\epsilon^{0.75}
+\end{equation}
+and
+\begin{equation}
+    \|\mA(t)\|_F < M_2 \epsilon
+\end{equation}
+\end{lemma}
+
+To prove this, we note that at initialization, $\mA,\mB$ and $\mC$ satisfy these bounds. From continuity, there exists a maximal time for which they are satisfied. We bound the rate of their growth, and thus show that for all t as described, we are within this region.
+
+\begin{lemma}\label{lemma:Y_and_W_ode}
+Assume $w_0>0$ and assume $\mA,\mB,\mC$ are $\epsilon$-normally initialized, we have the following bounds for all $0\le t\le \frac{1}{2w_0}\ln{\left( \frac{1}{\epsilon^{0.5}}\right)}$
+\begin{equation}\label{eq:z_ode}
+    Y(t)^\top Y(t)  \le c_1\epsilon^2e^{-2w_0 t} + c_2 \epsilon^{2.5},
+\end{equation}
+and
+\begin{equation}\label{eq:x_ode}
+    W(t)^\top W(t)  \ge c_3\epsilon^2e^{2w_0 t} - c_4 \epsilon^{2.5}.
+\end{equation}
+\end{lemma}
+
+Lemma \ref{lemma:Y_and_W_ode} shows that the growth rate of $W(t)^\top W(t)$ and the decay rate of $Y(t)^\top Y(t)$ both depend on the sign of $w_0$. In our analysis we assume $w_0>0$ for simplicity of presentation, the same analysis applies for $w_0<0$ with opposite roles for $Y$ and $W$. The proof of Lemma \ref{lemma:Y_and_W_ode} follows from writing the leading terms of the ODE and bounding the remaining terms by their upper bounds in the time considered.
+Using these lemmas, we proceed to prove Lemma \ref{thm:convergence_to_symmetric_configuration}. 
+
+\begin{proof}[\textbf{Proof of Lemma~\ref{thm:convergence_to_symmetric_configuration}}]
+Consider the dynamics at time $0\le t\le \frac{1}{2w_0}\ln{\left( \frac{1}{\epsilon^{0.5}}\right)}$.
+By Lemma \ref{lemma:Y_and_W_ode}, we have
+\begin{equation}
+    Y(t)^\top Y(t)\le c_1\epsilon^2 e^{-\ln{\frac{1}{\epsilon^{0.5}}}}+c_2 \epsilon^{2.5}=(c_1+c_2)\epsilon^{2.5}
+\end{equation}
+and
+\begin{equation}
+    W(t)^\top W(t)\ge c_3\epsilon^2 e^{\ln{\frac{1}{\epsilon^{0.5}}}}-c_4 \epsilon^{2.5}=c_3\epsilon^{1.5} - c_4\epsilon^{2.5}
+\end{equation}
+
+We can calculate the limit
+\begin{align}
+     \lim_{\epsilon\rightarrow 0} \frac{\|Y(t)\|^2}{\|W(t)\|^2}\le\lim_{\epsilon\rightarrow 0}\frac{(c_1+c_2)\epsilon^{2.5}}{c_3\epsilon^{1.5}-c_4\epsilon^{2.5}}=0
+\end{align}
+From Lemma \ref{lemma:upper_bound_in_time}, $\|\mA(t)\|_F\le M_2\epsilon$, so we can calculate the limit,
+
+\begin{equation}
+    \lim_{\epsilon\rightarrow 0} \frac{\|\mA(t)\|_F^2}{\|W(t)\|^2} \le\lim_{\epsilon\rightarrow 0}\frac{M_2\epsilon^2}{c_3\epsilon^{1.5}-c_4\epsilon^{2.5}}=0
+\end{equation}
+which concludes the proof.
+\end{proof}
+
+
+\begin{proof}[\textbf{Proof of Lemma~\ref{lemma:upper_bound_in_time}}]
+%
+At $t=0$, by Lemma \ref{lemma:bound_init}, $\|\mA\|_F < 2 \epsilon < M_2 \epsilon, \|\mB\|, \|\mC\| < 2 \epsilon < M_1 \epsilon^{0.75}$, where we bound $M_1>2\epsilon^{0.25}$.
+
+If there exists $t$ s.t. $\|\mA(t)\|_F>M_2 \epsilon$ (otherwise, we get trivially the desired bound for $\|\mA(t)\|$), from continuity and the intermediate value theorem, there exists a maximal $t_A$ s.t. for $0 \leq t < t_1, \|\mA(t)\|_F <  \epsilon, \|\mA(t_1)\|_F =M_2 \epsilon$.
+%Else, we will use the following assumption for $t_1 = \infty$.
+By similar argument for B, C, we can define $t_B, t_C$. By taking the minimal value between them, we get $T^*$ s.t. $\forall 0 \leq t<T^*, \|\mA(t)\|_F < M_2 \epsilon, \|\mB\|, \|\mC\| < M_1 \epsilon^{0.75}$.
+
+We start by proving the lemma under the assumption that $0 \leq t<T^*$. Later, we will show that $T^*>T$. 
+%
+Let us recall the derivative of $\mB$:
+\begin{equation}
+    \dot{\mB} = -\sum_{i=0}^{k-1} \nabla \ell_i (\mA^\top)^i \mC^\top.
+\end{equation}
+%
+Bounding it by the Cauchy-Schwartz inequality, we have
+\begin{equation}
+\label{eq:B_dot_CS_inequality1}
+    \|\dot{\mB}\| = \left\|-\sum_{i=0}^{k-1} \nabla \ell_i (\mA^\top)^i \mC^\top\right\| \leq \sum_{i=0}^{k-1} |\nabla \ell_i| \left\|(\mA^\top)\right\|_F^i \big\|\mC^\top\big\|.
+\end{equation}
+%
+Denote $M = \underset{i}{\max}(|w_i|)+M_1^2\epsilon^{1.5}$, then we have
+\begin{align}
+    M &= \underset{i}{\max}(|w_i|)+M_1^2\epsilon^{1.5} \geq \underset{i}{\max}(|w_i|)+\|\mC\| \|\mB\| \geq \underset{i}{\max}(|w_i|)+|\mC\mB|, \\ &\geq \underset{i}{\max}(|w_i|)+\underset{i}{\max}(|\mC\mA^i \mB|) \geq \underset{i}{\max}(|w_i|+|\mC\mA^i \mB|) \geq \underset{i}{\max}(|\nabla \ell_i|).
+\end{align}
+
+Recall the conservation law from Lemma~\ref{lemma:preserve_norm_diff} for the norms of $\mB$ and $\mC$:
+\begin{equation}
+    \forall t,\; \frac{d}{dt}\left(\left\|\mB(t)\right\|-\left\|\mC(t)\right\|\right) = 0.
+\end{equation}
+%
+By Lemma~\ref{lemma:bound_init}, we have
+\begin{equation}
+    \|\mB(0)\|, \|\mC(0)\| < 2 \epsilon \Rightarrow (|\|\mB(0)\|-\|\mC(0)\||) < 4 \epsilon.
+\end{equation}
+Therefore, we get
+\begin{equation}
+    \forall t,\; \|\mC(t)\| < \|\mB(t)\|+4 \epsilon.
+\end{equation}
+Note also that by assuming $M_2 \epsilon<1$, we have
+\begin{equation}
+    \sum_{i=0}^{k-1}(M_2\epsilon)^i< k.
+\end{equation}
+Plugging the various values into \eqref{eq:B_dot_CS_inequality1}, we have:
+\begin{align}
+\label{eq:B_dot_inequality_bound}
+    \|\dot{\mB}\| \leq  \sum_{i=0}^{k-1} |\nabla \ell_i| \|(\mA^\top)\|_F^i \|\mC^\top\| &< M (\|\mB\|+4 \epsilon) \sum_{i=0}^{k-1} \|(\mA^\top)\|_F^i \\
+    &< Mk (\|\mB\|+4 \epsilon).
+\end{align}
+Denoting $R = \|\mB\|^2 = \mB^\top \mB$, then
+\begin{equation}
+    \dot{R} = \dot{\mB^\top}\mB + \mB^\top\dot{\mB} = 2\mB^\top\dot{\mB}
+\end{equation}
+%
+Taking absolute value and then plugging \eqref{eq:B_dot_inequality_bound} results with %in the bound on $\frac{}{}$, we have:
+\begin{equation}
+    |\dot{R}| = |2\mB^\top\dot{\mB}| \leq 2 \|\mB^\top\| \|\dot{\mB}\| < 2k \|\mB^\top\| M (\|\mB\|+4 \epsilon).
+\end{equation}
+Using the definition of $R$, we get that
+\begin{equation}
+    \dot{|R|} < 2k M (|R|+4 \epsilon \sqrt{|R|})
+\end{equation}
+
+Notice that for all $t$ s.t. $\|\mB\| = \sqrt{R}<4 \epsilon<M_1 \epsilon^{0.75}$, we are done.
+For any $t_2$ s.t. $\sqrt{R(t_2)}>4 \epsilon$, from continuity and the intermediate value theorem, there exist a maximal $t_1$ s.t. $0 < t_1<t_2, \sqrt{R(t_1)}= 4 \epsilon$. For all $t_1<t<t_2, \sqrt{R(t)}>4 \epsilon$.
+Thus,
+\begin{equation}
+    \forall t_1<t \leq t_2,\; \dot{|R|} < 4k M |R|
+\end{equation}
+%
+Integrating by $t$ and substituting, we get that for all $t_1<t_{int}<t_2$:
+
+\begin{equation}
+    \int_{t_1}^{t_{int}} \frac{1}{|R|}\dot{|R|} dt < \int_{t_1}^{t_{int}}4k M dt
+\end{equation}
+\begin{equation}
+    \Rightarrow \int_{R(t_1)}^{R(t_{int})} \frac{1}{|R|}dR < 8 M [t_{int}-t_1] < 4kM [T-0]
+\end{equation}
+\begin{equation}
+    \Rightarrow \ln\left( \frac{|R(t_{int})|}{|R(t_1)|} \right) < 4k M T 
+\end{equation}
+\begin{equation}
+    \Rightarrow |R(t_{int})| < \exp(4k M T) |R(t_1)| = (4 \epsilon)^2 \exp\left(4k M \cdot \ln \left( \frac{1}{\epsilon^{0.5}} \right)\right)
+\end{equation}
+\begin{equation}
+  \Rightarrow  |R(t_{int})| <  (4 \epsilon)^2 \exp(4k M) \frac{1}{\epsilon^{0.5}}.
+\end{equation}
+%
+Denoting $M_1^2 = 16 \cdot \exp(4kM)$, we have:
+\begin{equation}
+    \|\mB(t_{int})\| <  M_1 \epsilon^{0.75}
+\end{equation}
+%
+To summarize, we have shown that for all $0<t<T$, there exists $M_1$ s.t $\|\mB(t)\|<M_1 \epsilon^{0.75}$.
+
+Using an identical proof with the roles of $\mC^\top, \mB$ reversed, we have $|\mC(t)|<M_1 \epsilon^{0.75}$. As we have defined $t_B, t_C$ as the maximal points s.t. this property occurs for $T< t_B, t_C$.
+
+Next, we will bound $\|\mA\|_F$.
+%
+Recall that $\|\mA\|_F^2=Tr(\mA^\top \mA)$, and
+\begin{align}
+    \frac{d}{dt}Tr(\mA^\top \mA)& =Tr\left(\frac{d}{dt}(\mA^\top \mA)\right)\\
+    & =Tr\left(\dot{\mA}^\top \mA\right) + Tr\left(\mA^\top \dot{\mA}\right)\\
+    & =2Tr\left( \mA^\top \dot{\mA} \right),
+\end{align}
+where we have used the linearity of trace and its invariance to transpose.
+% here we use linearity of trace and invraiance to transpose.
+Recall that
+\begin{equation}
+    \dot{\mA}=-\sum_{i=1}^{k-1}\nabla\ell_i\sum_{r=0}^{i-1}(\mA^\top)^r\mC^\top \mB^\top(\mA^\top)^{i-r-1}.
+\end{equation}
+Multiplying it from the left by $\mA^\top$ and then taking trace provides us with
+\begin{equation}
+    Tr(\mA^\top \dot{\mA})=-\sum_{i=1}^{k-1}\nabla\ell_i\sum_{r=0}^{i-1}Tr\left((\mA^\top)^{r+1}\mC^\top \mB^\top(\mA^\top)^{i-r-1}\right).
+\end{equation}
+Taking a transpose and then using the cyclic property of trace and, we have for the terms in the sum:
+\begin{align}
+    Tr\left((\mA^\top)^{r+1}\mC^\top \mB^\top(\mA^\top)^{i-r-1}\right)&=Tr\left(\mB^\top (\mA^\top)^{i}\mC^\top \right)\\
+    & =Tr\left(\mC\mA^i\mB\right)\\
+    & =\mC\mA^i\mB
+\end{align}
+Thus, we end up with
+\begin{equation}
+    Tr(\mA^\top \dot{\mA})=-\sum_{i=1}^{k-1}\nabla\ell_i\sum_{r=0}^{i-1}\mC\mA^i\mB = -\sum_{i=1}^{k-1}\nabla\ell_i \cdot i\cdot \mC\mA^i\mB.
+\end{equation}
+We use it to bound $Tr(\mA^\top \dot{\mA})$:
+\begin{equation}\label{eq:trace_bound}
+    Tr(\mA^\top \dot{\mA})\le \sum_{i=1}^{k-1}|\nabla\ell_i| \cdot i\cdot |\mC\mA^i\mB|
+\end{equation}
+%
+Using the Cauchy-Schwartz inequality and then plugging $M > |\nabla \ell_i|$ and the bounds found for $\|\mC\|, \|\mB\|<M_1 \epsilon^{0.75}$ leads to
+\begin{equation}
+    |\nabla\ell_i| \cdot i\cdot |\mC\mA^i\mB| \leq M \cdot i \cdot \|\mC\| \|\mA\|_F^i \|\mB\| \leq M \cdot i \cdot M_1^2 \epsilon^{1.5} \|\mA\|_F^i
+\end{equation}
+Putting all together provides us with
+\begin{equation}
+Tr(\mA^\top \dot{\mA})\le \sum_{i=1}^{k-1} M \cdot i \cdot M_1^2 \epsilon^{1.5} \|\mA\|_F^i = M \cdot M_1^2 \epsilon^{1.5} \sum_{i=1}^{k-1}  i \cdot  \|\mA\|_F^i
+\end{equation}
+Noting that $\|\mA\|_F <1$ and denoting $\tilde{M}_2 = \frac{k^2}{2} M \cdot M_1^2$ leads to
+\begin{equation}
+    \sum_{i=1}^{k-1}  i \|\mA\|_F^i < \|\mA\|_F \frac{k(k-1)}{2} < \frac{k^2}{2} \|\mA|\|_F
+\end{equation}
+Therefore, we get that
+\begin{equation}
+ Tr(\mA^\top \dot{\mA}) < \tilde{M}_2 \epsilon^{1.5}  \|\mA\|_F.
+\end{equation}
+Notice that
+\begin{equation}
+    \|\mA\|_F \cdot \frac{d}{dt}(\|\mA\|_F)  =0.5 \frac{d}{dt}(\|\mA\|_F^2) = Tr(\mA^\top \dot{\mA})
+\end{equation}
+%
+\begin{equation}
+    \Rightarrow \|\mA\|_F \cdot \frac{d}{dt}(\|\mA\|_F) < \tilde{M}_2 \epsilon^{1.5}  \|\mA\|_F.
+\end{equation}
+\begin{equation}
+    \Rightarrow \frac{d}{dt}(\|\mA\|_F) < \tilde{M}_2 \epsilon^{1.5}
+\end{equation}
+Therefore, for any $0 \leq t_3 \leq T$:
+%
+\begin{equation}
+    \|\mA(t_3)\|_F-\|\mA(0)\|_F = \int_0^{t_3} \frac{d}{dt}(\|\mA\|_F) dt< \tilde{M}_2 \epsilon^{1.5} t_3
+\end{equation}
+%
+\begin{equation}
+    \Rightarrow \|\mA(t_3)\|_F < \tilde{M}_2 \epsilon^{1.5} T + \|\mA(0)\|_F.
+\end{equation}
+Recall that by Lemma \ref{lemma:bound_init}, we have for any $x>0, \ln(x)<x$ that
+\begin{equation}
+    \|\mA(0)\|_F < 4 d \epsilon.
+\end{equation}
+Using the fact that
+\begin{equation}
+    T = \frac{1}{2w_0}\ln{\left( \frac{1}{\epsilon^{0.5}}\right)} <  \frac{1}{2w_0} \epsilon^{-0.5}
+\end{equation}
+we get that
+\begin{equation}
+    \Rightarrow \|\mA(t_3)\|_F < \frac{\tilde{M}_2}{2w_0} \epsilon + 4d \epsilon.
+\end{equation}
+Taking $M_2=\frac{\tilde{M}_2}{2w_0}+ 4\epsilon$, we have for all $0 \leq t \leq T$ that
+\begin{equation}
+    \Rightarrow \|\mA(t)\|_F < M_2 \epsilon
+\end{equation}
+
+Once again, recall that we defined $t_A$ as the maximal $t$ with this property, thus $T<t_A$. Since we already have also that $T<t_B, t_C$, we get $T<\min(T_A, t_B, t_C) = T^*$. 
+\end{proof}
+
+\subsubsection{Bounding $W^\top W$ and $Y^\top Y$}
+
+\begin{proof}[\textbf{Proof of Lemma~\ref{lemma:Y_and_W_ode}}]
+Denote
+\begin{equation}
+    Y\equiv \mC^\top -\mB, \hspace{1cm} W\equiv \mC^\top + \mB.
+\end{equation}
+Recall that
+\begin{equation}
+    \frac{\partial\mathcal{L}}{\partial \mB} = \sum_{i=0}^{k-1}\nabla\ell_i (\mA^\top)^i C^\top, \hspace{1cm} \frac{\partial\mathcal{L}}{\partial \mC} = B^\top\sum_{i=0}^{k-1}\nabla\ell_i (\mA^\top)^i
+\end{equation}
+We can write the change in $Y$,
+\begin{align}\label{eq:Y_dot}
+    \dot{Y} =\dot{\mC}^\top - \dot{\mB} & = -\sum_{i=0}^{k-1}\nabla\ell_i \mA^i\mB + \sum_{i=0}^{k-1}\nabla\ell_i (\mA^\top)^i \mC^\top\\
+    & = \sum_{i=0}^{k-1}\nabla\ell_i\left((\mA^\top)^i\mC^\top - \mA^i\mB\right)\nonumber
+\end{align}
+Denote $(\mA^i)_S=\frac{\mA^i+(\mA^\top)^i}{2}$ and $(\mA^i)_{\bar{S}}=\frac{\mA^i-(\mA^\top)^i}{2}$ the symmetric and anti-symmetric parts of $\mA^i$. We can now write
+\begin{align}\label{eq:A_i_sym_and_asym}
+    (\mA^\top)^i\mC^\top - \mA^i\mB & =\left[(\mA^i)_S - (\mA^i)_{\bar{S}}\right]\mC^\top - \left[(\mA^i)_S + (\mA^i)_{\bar{S}}\right]\mB\\
+    & = (\mA^i)_S(\mC^\top - \mB) - (\mA^i)_{\bar{S}}(\mC^\top + \mB)\nonumber\\
+    & = (\mA^i)_S Y - (\mA^i)_{\bar{S}}W\nonumber
+\end{align}
+Note also that for $i=0$, we have $\mA^0=I$ and its anti-symmetric part is the zero matrix, writing $i=0$ separately and assigning \eqref{eq:A_i_sym_and_asym} into \eqref{eq:Y_dot},
+\begin{equation}\label{eq:Y_dot_v2}
+    \dot{Y} = \nabla\ell_0 Y + \sum_{i=1}^{k-1}\nabla\ell_i\left((\mA^i)_S Y - (\mA^i)_{\bar{S}}W\right)
+\end{equation}
+Let us look at $\frac{d}{dt}(Y^\top Y)=\dot{Y}^\top Y + Y^\top \dot{Y}=2Y^\top\dot{Y}$.
+
+Multiplying \eqref{eq:Y_dot_v2} from the left with $Y^\top$ evaluates to
+
+\begin{equation}
+    Y^\top\dot{Y} = \nabla\ell_0 Y^\top Y +\sum_{i=1}^{k-1}\nabla\ell_i\left(Y^\top(\mA^i)_SY - Y^\top(\mA^i)_{\bar{S}}W\right)
+\end{equation}
+We now turn to bound the terms in the sum. 
+\begin{equation}\label{eq:first_bound_on_Y_TY_dot}
+    Y^\top\dot{Y} \le \nabla\ell_0 Y^\top Y +\sum_{i=1}^{k-1}|\nabla\ell_i|\left(|Y^\top(\mA^i)_SY| + |Y^\top(\mA^i)_{\bar{S}}W|\right)
+\end{equation}
+
+We can bound each term using Cauchy–Schwarz. We first need to bound $\|Y\|$ and $\|W\|$, which are trivially bounded by 
+\begin{equation}
+    \|Y\|,\|W\|\le \|\mC\|+\|\mB\|\le 2M_1\epsilon^{0.75}
+\end{equation}
+As for the symmetric and anti-symmetric parts of $\mA$,
+\begin{equation}\label{eq:bound_singular_of_A_sym_and_asym}
+    \|(\mA^i)_S\|_F=\left\|\frac{\mA^i+(\mA^i)^\top}{2}\right\|_F \le \frac{1}{2}\left(\|\mA^i\|_F+\|(\mA^i)^\top\|_F\right)=\|\mA^i\|_F\le \|\mA\|_F^i,
+\end{equation}
+where the last inequality follows again from Cauchy–Schwarz (the same considerations apply for $(\mA^i)_{\bar{S}}$).
+
+From Cauchy–Schwarz we can bound $|Y^\top(\mA^i)_{\bar{S}}W|\le \|Y^\top\|\|(\mA^i)_{\bar{S}}\|_F\|W\| \le \|Y\|\|\mA\|_F^i\|W\|$, we denote $M_3 = max(M_1, M_2)$ and derive:
+\begin{equation}\label{eq:cauchy_schwarz_bound}
+    |Y^\top(\mA^i)_{\bar{S}}W| \le 2M_1\epsilon^{0.75}(M_2\epsilon)^i2M_1\epsilon^{0.75}< 4M_3^3 \epsilon^{1.5+i},
+\end{equation}
+%
+which is maximized when $i=1$. We again bound:
+$M = \underset{i}{\max}(|w_i|)+M_1^2\epsilon^{1.5}>|\nabla \ell_i|$. We can bound the terms in \eqref{eq:first_bound_on_Y_TY_dot} by 
+\begin{equation}
+    |\nabla\ell_i|\left(|Y^\top(\mA^i)_SY| + |Y^\top(\mA^i)_{\bar{S}}W|\right)\le 8\cdot M \cdot  M_3^3\epsilon^{2.5}
+\end{equation}
+
+Plugging back into \eqref{eq:first_bound_on_Y_TY_dot}:
+\begin{equation}
+Y^\top\dot{Y} \le \nabla\ell_0 Y^\top Y +\sum_{i=1}^{k-1} 8\cdot M \cdot  M_3^3\epsilon^{2.5}
+\end{equation}
+We can also bound $\nabla\ell_0=(\mC\mB-w_0)\le -w_0 +|\mC\mB|\le -w_0+\|\mC\|\|\mB\|\le -w_0+M_1^2\epsilon^{1.5}$. Note also that we multiply by $Y^\top Y$ so we can bound
+\begin{equation}
+    \nabla\ell_0Y^\top Y\le -w_0 Y^\top Y + \underbrace{M_1^2\epsilon^{1.5}(M_21\epsilon^{0.75})^2}_{=4M_1^4\epsilon^3}
+\end{equation}
+putting back together, we get
+\begin{equation}
+Y^\top\dot{Y} \le -w_0 Y^\top Y + 4M_1^4\epsilon^3 + (k-1)(M_1+1)8\cdot M \cdot  M_3^3\epsilon^{2.5}
+\end{equation}
+In particular, there exists $M_4$ such that 
+\begin{equation}
+Y^\top\dot{Y} \le -w_0 Y^\top Y + \frac{M_4}{2}\epsilon^{2.5}
+\end{equation}
+Recall that we were interested in bounding $\frac{d}{dt}(Y^\top Y)=\dot{Y}^\top Y + Y^\top \dot{Y}=2Y^\top\dot{Y}$,
+\begin{equation}
+    \frac{d}{dt}(Y^\top Y)\le -2w_0Y^\top Y+M_4\epsilon^{2.5}
+\end{equation}
+Denoting $z(t)\equiv Y(t)^\top Y(t)$ and $x(t)\equiv W(t)^\top W(t)$, and using Lemma \ref{lemma:integral_bound}, we have the desired bounds
+\begin{equation}
+    z(t)  \le \frac{1}{2w_0}\left[(33w_0 d \epsilon^2)e^{-2w_0 t} + M_4 \epsilon^{2.5} \right]
+\end{equation}
+In particular, we can write
+\begin{equation}
+    z(t)  \le c_1\epsilon^2e^{-2w_0 t} + c_2 \epsilon^{2.5}
+\end{equation}
+
+and
+\begin{equation}
+    x(t)  \ge c_3\epsilon^2e^{2w_0 t} - c_4 \epsilon^{2.5}
+\end{equation}
+where $c_i$'s are positive constants.
+
+Note that the derivation of $x(t)$ is exactly the same as $z(t)$ with opposite signs and bounding from below instead.
+
+\end{proof}
+
+\subsubsection{Integral bound of $\|Y\|^2$ and $\|W\|^2$}
+
+
+\begin{lemma}\label{lemma:integral_bound}
+Assume $\dot{z}< -2w_0 z +M_4 \epsilon^{2.5} <0, \dot{x}> 2w_0 z -M_4 \epsilon^{2.5} >0$ , where $w_0>0$. 
+Then, under the assumptions of Lemma \ref{lemma:bound_init}:
+\begin{equation}
+    z(t_1)  < \frac{1}{2w_0}\left(\exp(-2w_0t_1) \cdot (75 w_0 d \epsilon^2) + M_4 \epsilon^{2.5} \right)
+\end{equation}
+\begin{equation}
+    x(t_2)  > \frac{1}{2w_0}\left(\exp(2w_0t_2) \cdot (\frac{w_0\epsilon^2}{25d}) + M_4 \epsilon^{2.5} \right)
+\end{equation}
+\end{lemma}
+
+\begin{proof}[\textbf{Proof of Lemma~\ref{lemma:integral_bound}}]
+%
+Assume $\dot{z}< -2w_0 z +M_4 \epsilon^{2.5}$ , where $w_0>0, 2w_0z>M_4 \epsilon^{2.5}$.
+Similarly, assume $\dot{x}> 2w_0 x -M_4 \epsilon^{2.5}$.
+
+Then:
+\begin{equation}
+    \frac{\dot{z}}{2w_0 z -M_4 \epsilon^{2.5}}< -1
+\end{equation}
+\begin{equation}
+    \frac{\dot{x}}{2w_0 x -M_4 \epsilon^{2.5}}>1
+\end{equation}
+
+Integrating both sides by dt, and using integration by substitution, we get:
+\begin{equation}
+    -t_1 = \int_0^{t_1} -1 > \int_0^{t_1} \frac{1}{2w_0 z -M_4 \epsilon^{2.5}} \frac{dz}{dt} dt = \int_{z(0)}^{z(t_1)} \frac{1}{2w_0 z -M_4 \epsilon^{2.5}} dz
+\end{equation}
+\begin{equation}
+    t_2 = \int_0^{t_2} 1 < \int_0^{t_2} \frac{1}{2w_0 x -M_4 \epsilon^{2.5}} \frac{dx}{dt} dt = \int_{x(0)}^{x(t_2)} \frac{1}{2w_0 x -M_4 \epsilon^{2.5}} dx
+\end{equation}
+
+We note:
+\begin{align}
+   \int_{z(0)}^{z(t_1)} \frac{1}{2w_0 z -M_4 \epsilon^{2.5}} dz &= \frac{1}{2w_0} [\ln(2w_0 z(t_1)  -M_4 \epsilon^{2.5}) -\ln(2w_0 z(0) -M_4 \epsilon^{2.5} )] \\
+   \Rightarrow\int_{z(0)}^{z(t_1)} \frac{1}{2w_0 z -M_4 \epsilon^{2.5}} dz &= \frac{1}{2w_0} \left[ \ln \left( \frac{2w_0 z(t_1) -M_4 \epsilon^{2.5} }{2w_0 z(0) -M_4 \epsilon^{2.5} }\right) \right] \\
+   \int_{x(0)}^{x(t_2)} \frac{1}{2w_0 x -M_4 \epsilon^{2.5}} dx &= \frac{1}{2w_0} \left[ \ln \left( \frac{2w_0 x(t_2) -M_4 \epsilon^{2.5} }{2w_0 x(0) -M_4 \epsilon^{2.5} }\right) \right] 
+\end{align}
+Combining equations, we have:
+\begin{equation}
+   \frac{1}{2w_0} \left[ \ln \left( \frac{2w_0 z(t_1) -M_4 \epsilon^{2.5} }{2w_0 z(0) -M_4 \epsilon^{2.5} } \right) \right]  < -t_1
+\end{equation}
+\begin{equation}
+   \Rightarrow \ln \left( \frac{2w_0 z(t_1) -M_4 \epsilon^{2.5} }{2w_0 z(0) -M_4 \epsilon^{2.5} } \right) < -2w_0t_1
+\end{equation}
+\begin{equation}
+   \Rightarrow \frac{2w_0 z(t_1) -M_4 \epsilon^{2.5} }{2w_0 z(0) -M_4 \epsilon^{2.5} } < \exp(-2w_0t_1)
+\end{equation}
+\begin{equation}
+   \Rightarrow 2w_0 z(t_1) -M_4 \epsilon^{2.5} < \exp(-2w_0t_1) \cdot \left(2w_0 z(0) -M_4 \epsilon^{2.5} \right)
+\end{equation}
+\begin{equation}
+   \Rightarrow z(t_1)  < \frac{1}{2w_0}\left[\exp(-2w_0t_1) \cdot (2w_0 z(0) -M_4 \epsilon^{2.5}) + M_4 \epsilon^{2.5} \right]
+\end{equation}
+
+\begin{equation}
+    x(t_2)  > \frac{1}{2w_0}\left[\exp(2w_0t_2) \cdot (2w_0 x(0) -M_4 \epsilon^{2.5}) + M_4 \epsilon^{2.5} \right]
+\end{equation}
+
+We note, $z(0) = Y^T(0)Y(0)$. 
+By linearity of sum of variances, $Y(0)$'s entries are distributed according to $\mathcal{N}(\sqrt{2}\cdot \epsilon)$,  by Lemma~\ref{lemma:bound_init}:
+\begin{equation}
+    \frac{\sqrt{2}}{2}\epsilon<Y(0)<\frac{3\sqrt{2}}{2}\epsilon
+\end{equation}
+From Cauchy-Schwartz, $z(0)<3\epsilon^2$ with high probability.
+$W$ is distributed as $Y$, therefore, similarly, $x(0)> \frac{1}{2}\epsilon^2$.
+Assuming $M_4 \epsilon^{2.5} < \frac{w_0 \epsilon^2}{2}$, we have:
+
+\begin{equation}
+    z(t_1)  < \frac{1}{2w_0}\left(\exp(-2w_0t_1) \cdot (6 w_0 \epsilon^2) + M_4 \epsilon^{2.5} \right)
+\end{equation}
+\begin{equation}
+    x(t_2)  > \frac{1}{2w_0}\left(\exp(2w_0t_2) \cdot (w_0\epsilon^2) + M_4 \epsilon^{2.5} \right)
+\end{equation}
+
+Concluding the proof.
+% Thus, we have proven all necessary lemmas in order to prove Proposition \ref{prop:implicit_bias_for_balanced_init}.
+\end{proof}
