@@ -67,7 +67,7 @@ The latter condition implies that the student realizes the same input-output map
 When the student is \emph{overparameterized}, in the sense that $d$ is greater than $k$ and~\smash{$\hat{d}$}, it may perfectly generalize, i.e.~lead the population loss over length~$k$ sequences (\Eqref{eq:population_loss}) to equal zero, and yet fail to extrapolate as stated in the following proposition.
 \begin{proposition}\label{prop:symmetric_lds_expressivity}
 Assume $d > k$, and let $\epsilon \geq 0$ and $q \in \{ k + 1 , k + 2 , \ldots\}$.
-Then, for any teacher parameters \smash{$\hat{\Theta}$}, there exist student parameters $\Theta$ with which the population loss in \Eqref{eq:population_loss} equals zero, and yet the student does \emph{not} $\epsilon$-extrapolate with horizon $q$.
+Then, for any teacher parameters \smash{$\hat{\Theta}$}, there exist student parameters $\Theta$ with which the population loss in \Eqref{eq:population_loss} equals zero, and yet the student does \emph{\textbf{not}} $\epsilon$-extrapolate with horizon $q$.
 \end{proposition}
 \begin{sproof}[Proof sketch (for complete proof see \Appref{sec:apdx:perfect_generalization_failed_extrapolation}).]
 The result follows from the fact that the first~$d$ elements of the student's impulse response can be assigned freely via a proper choice of~$\Theta$.

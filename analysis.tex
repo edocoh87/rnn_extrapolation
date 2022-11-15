@@ -17,7 +17,7 @@ For a vector $\vv \in \R^m$, we use $\|\vv \|$ to denote the Euclidean norm and~
 Theoretical analyses of implicit generalization often assume convergence to a solution attaining zero loss (see, e.g., \cite{azulay2021implicit, gunasekar2017implicit, lyu2019gradient, woodworth2020kernel}).
 Under such an assumption, Theorem~\ref{thm:exact_extrapolation} below establishes implicit extrapolation, i.e.~that the solution to which GF converges extrapolates, \emph{irrespective of how large the student's state space dimension~$d$ is}.
 A condition posed by the theorem is that the training sequence length~$k$ is greater than two times the teacher's state space dimension~\smash{$\hat{d}$}.
-%This condition is required for the information entailed in training sequences to allow extrapolation.\amirg{I would drop this sentence, as it again points to a DOF direction. And rephrase the following sentence e..g, "In sec.. we show empirically smaller $k$ values result in failure to extrapolate."}
+%This condition is required for the information entailed in training sequences to allow extrapolation.\amirg{I would drop this sentence, as it again points to a DOF direction. And rephrase the following sentence e..g, "In sec.. we show empirically smaller kk values result in failure to extrapolate."}
 We empirically demonstrate the necessity of this condition in \Secref{sec:experiments}, by showing that smaller values for~$k$ lead to failure in extrapolation.
 \begin{theorem}\label{thm:exact_extrapolation}
 Assume that $d > k > 2\hat{d}$, the teacher parameters~$\hat{\Theta}$ are balanced (Definition~\ref{def:balanced}), and the student parameters~$\Theta$ are learned by applying GF to the loss~$\mathcal{L} ( \cdot )$ (\Eqref{eq:population_loss}) starting from a balanced initialization.
@@ -48,7 +48,7 @@ Without loss of generality, we may assume that \smash{$\hat{\mA}$} is diagonal (
 We may also assume that \smash{$\hat{\mC}\hat{\mB} = 1$} (otherwise we absorb a scaling factor into $\mB$ and/or~$\mC$).
 %Without loss of generality we assume $\hat{\mC}\hat{\mB}=1$.\footnote{We assume the teacher is balanced and therefore $\hat{\mC}\hat{\mB}=\sum_{i=1}^{\hat{d}}b_i^2$ is non-negative. Denote $\hat{\mC}\hat{\mB}\equiv\eta$ and suppose $\eta\neq 1$. The system defined by $\Theta'=(\frac{\hat{\mC}}{\sqrt{\eta}}, \hat{\mA}, \frac{\hat{\mB}}{\sqrt{\eta}})$ has the same impulse response as $\hat{\Theta}$ scaled by $\frac{1}{\eta}$ and as a result satisfies $\mC'\mB'=1$.} 
 Since \smash{$\hat{\mC}^\top=\hat{\mB}$} (teacher is balanced), we may define a probability vector (i.e.~a vector with non-negative entries summing up to one) \smash{$\hat{\vp} \in \mathbb{R}^{\hat{d}}$} via \smash{$\hat{p}_i=\hat{\emC}_i\hat{\emB}_i$}, \smash{$i = 1 , \ldots , \hat{d}$}.
-We let \smash{$\hat{Z}$} denote the random variable whose support is \smash{$\{ \hat{A}_{1 1} , \ldots , \hat{A}_{\hat{d} \hat{d}} \}$} and which assumes the value \smash{$\hat{A}_{i i}$} with probability~\smash{$\hat{p}_i$}, \smash{$i = 1 , \ldots , \hat{d}$}.
+We let \smash{$\hat{Z}$} denote the random variable supported on \smash{$\{ \hat{A}_{1, 1} , \ldots , \hat{A}_{\hat{d}, \hat{d}} \}$}, which assumes the value \smash{$\hat{A}_{i, i}$} with probability~\smash{$\hat{p}_i$}, \smash{$i = 1 , \ldots , \hat{d}$}.
 %From the balanced assumption we have $\hat{\mC}^\top=\hat{\mB}$ and therefore if we define 
 %$\hat{p}_i=\hat{\emC}_i\hat{\emB}_i$ we have that $\hat{p}_i\geq 0$ and $\sum_i \hat{p}_i=1$ and therefore $\hat{\vp}$ may be interpreted as a distribution over a random variable with $\hat{d}$ possible values. We shall assume that these values are $\hat{\emA}_1,\ldots,\hat{\emA}_{\hat{d}}$, and denote the corresponding random variable by $Z$.
 Notice that for every $j \in \mathbb{N}$:
@@ -108,15 +108,38 @@ Lemma~\ref{lemma:exact_extrapolation} then implies that it extrapolates.
 \subsection{Approximate Convergence Leads to Approximate Extrapolation} \label{sec:approx_extrapolation}
 
 Theorem~\ref{thm:exact_extrapolation} in \Secref{sec:exact_extrapolation} proves extrapolation in the case where GF converges to a zero loss solution.
-Theorem~\ref{thm:main_result} below extends this result by establishing that, as long as the teacher is \emph{stable}, approximate convergence leads to approximate extrapolation.
+Theorem~\ref{thm:main_result} below extends this result by establishing that, under mild conditions, approximate convergence leads to approximate extrapolation~---~or more formally~---~for any $\epsilon > 0$ and $q \in \mathbb{N}$, when GF leads the loss to be sufficiently small, the student $\epsilon$-extrapolates with horizon~$q$.
 \begin{theorem}\label{thm:main_result}
-Assume the conditions of Theorem~\ref{thm:exact_extrapolation}, and that the teacher parameters~$\hat{\Theta}$ are stable, i.e. the singular values of~\smash{$\hat{\mA}$} are in~$[-1,1]$.
+Assume the conditions of Theorem~\ref{thm:exact_extrapolation}, and that the teacher parameters~$\hat{\Theta}$ are stable, i.e. the eigenvalues of~\smash{$\hat{\mA}$} are in~$[-1,1]$.
+Assume also that~\smash{$\hat{\Theta}$} are non-degenerate, in the sense that the input-output mapping they realize is not identically zero.
+Finally, assume that the student parameters~$\Theta$ learned by GF are confined to some bounded domain in parameter space. 
+Then, for any $\epsilon > 0$ and $q \in \mathbb{N}$, there exists $\delta(\epsilon, q) > 0$ such that whenever $\mathcal{L} ( \Theta ) \leq \delta(\epsilon, q)$, the student $\epsilon$-extrapolates with horizon~$q$.
+\ignore{Assume the conditions of Theorem~\ref{thm:exact_extrapolation}, and that the teacher parameters~$\hat{\Theta}$ are stable, i.e. the singular values of~\smash{$\hat{\mA}$} are in~$[-1,1]$.
 Assume also that~\smash{$\hat{\Theta}$} are non-degenerate, in the sense that the input-output mapping they realize is not identically zero.
 Then, for any $\epsilon > 0$ and $q \in \mathbb{N}$, there exists $\delta(\epsilon, q) > 0$ which admits the following:
-whenever GF leads the student parameters~$\Theta$ to within (Frobenius) distance $\delta(\epsilon,q)$ from a balanced point~$\Theta^*$ satisfying $\mathcal{L} ( \Theta^* ) = 0$, the student $\epsilon$-extrapolates with horizon~$q$. 
+whenever GF leads the student parameters~$\Theta$ to within (Frobenius) distance $\delta(\epsilon,q)$ from a balanced point~$\Theta^*$ satisfying $\mathcal{L} ( \Theta^* ) = 0$, the student $\epsilon$-extrapolates with horizon~$q$.}
 \end{theorem}
 \begin{sproof}[Proof sketch (for complete proof see \Appref{sec:apdx:approx_extrapolation}).]
-%\nadav{I did not review this}
+Let $\delta > 0$ be a constant whose value will be chosen later, and suppose GF reached a point~$\Theta$ satisfying $\mathcal{L} ( \Theta ) \leq \delta$.
+
+Following the proof of Lemma~\ref{lemma:exact_extrapolation}, \smash{$\hat{\Theta}$}~is identified with a distribution supported on the eigenvalues of~\smash{$\hat{\mA}$}, whose $j$'th moment is \smash{$\hat{m}_j := \hat{\mC}\hat{\mA}^j\hat{\mB} ( \hat{\mC} \hat{\mB} )^{-1}$} for every $j \in \mathbb{N}$.
+Similarly, $\Theta$~is identified with a distribution supported on the eigenvalues of~$\mA$, whose $j$'th moment is $m_j := \mC \mA^j \mB ( \mC \mB )^{-1}$ for every $j \in \mathbb{N}$.
+The fact that $\mathcal{L} ( \Theta ) \leq \delta$ implies \smash{$| \mC \mB - \hat{\mC} \hat{\mB} | \leq \sqrt{\delta}$}, and in addition \smash{$| \hat{m}_j - m_j | \leq \Oc ( \sqrt{\delta} )$} for every $j = 1 , \ldots , k - 1$. 
+To conclude the proof it suffices to show that
+\begin{equation}
+\label{eq:moments_approx}
+| \hat{m}_j - m_j | \leq \Oc ( \epsilon ) \quad \forall j \in \{ 1 , \ldots , q - 1 \}
+\end{equation}
+given a small enough choice for~$\delta$ (this choice then serves as $\delta ( \epsilon , q )$ in theorem statement).
+
+We establish \Eqref{eq:moments_approx} by employing the theory of Wasserstein distances \citep{vaserstein1969markov}.
+For $p \in \mathbb{N}$, denote by~$\Wc_p$ the $p$-Wasserstein distance between the distributions identified with \smash{$\hat{\Theta}$} and~$\Theta$.
+Since \smash{$k > 2 \hat{d}$}, it holds that \smash{$| \hat{m}_j - m_j | \leq \Oc ( \sqrt{\delta} )$} for every \smash{$j = 1 , \ldots , 2 \hat{d}$}.
+Proposition~2 in \cite{wu2020optimal} then implies $\Wc_1 \leq \Oc ( \delta^{1 / 4 \hat{d}} )$.
+For any $p \in \mathbb{N}$, $\Wc_p \leq \Oc ( \Wc_1^{1 / p})$ (see Section~2.3 in~\cite{panaretos2019statistical}) and \smash{$| \hat{m}_p - m_p | \leq \Oc ( \Wc_p )$} (see Section~1.2 in \cite{biswas2021bounding}).
+Combining the latter three inequalities, we have that \smash{$| \hat{m}_p - m_p | \leq \Oc ( \delta^{1 / 4 \hat{d} p} )$} for any $p \in \mathbb{N}$.
+Choosing \smash{$\delta = \Oc ( \epsilon^{4 \hat{d} ( q - 1 )} )$} therefore establishes \Eqref{eq:moments_approx}.
+\ignore{
 In order to show $\epsilon$-extrapolation with horizon $q$ we need to show that $\forall\epsilon>0, q\in\mathbb{N}$, $\exists \delta(\epsilon,q)>0$ such that for any $\Theta'$ satisfying $||\Theta'-\Theta^*||<\delta$, we have for $n=0,\dots,q$ that
 \begin{equation}
     \mC'(\mA')^n\mB'-\hat{\mC}\hat{\mA}^n\hat{\mB}=O(\epsilon).
@@ -144,6 +167,7 @@ Combining the three steps above, we have that if $|\mC'(\mA')^n\mB'-\mC^*(\mA^*)
 
 By setting $\delta<\left(\frac{\epsilon}{c_1\cdot S^{q-1}}\right)^{4\hat{d}}$ the RHS of \Eqref{eq:final_inequality} satisfies $c_1S^{p-1}\delta^{\frac{1}{4\hat{d}}}<\epsilon$.
 % In order to have $\epsilon$-extrapolation up to horizon $q$, we can set $\delta<\left(\frac{\epsilon}{c_1\cdot S^{q-1}}\right)^{4\hat{d}}$ and then the RHS of \Eqref{eq:final_inequality} satisfies $c_1S^{p-1}\delta^{\frac{1}{4\hat{d}}}<\epsilon$.
+}
 \end{sproof}
 
 \ignore{
@@ -162,7 +186,7 @@ It was shown in~\cite{cohen2022extrapolation} that theoretical predictions deriv
 Proposition~\ref{prop:implicit_bias_for_balanced_init} below theoretically supports this finding, establishing that with high probability, random near-zero initialization leads GF to arrive at an approximately balanced point, i.e.~a point $\Theta = ( \mA , \mB , \mC )$ for which the difference between $\mB$ and~$\mC^\top$ is negligible compared to their size.
 \begin{proposition}\label{prop:implicit_bias_for_balanced_init}
 Suppose that:
-\emph{(i)}~$d > 4$;
+\emph{(i)}~$d > 20$;
 \emph{(ii)}~the teacher parameters~$\hat{\Theta}$ are balanced and are non-degenerate, in the sense that the input-output mapping they realize is not identically zero;
 and 
 \emph{(iii)}~the student parameters are learned by applying GF to the loss~$\mathcal{L} ( \cdot )$.
