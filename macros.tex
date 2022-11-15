@@ -1,0 +1,126 @@
+\ProvidesPackage{macros}
+
+% packages
+% \usepackage{subfig}
+\usepackage{float}
+% \usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{mathabx}
+\usepackage{bbm}
+\usepackage{lipsum}
+\usepackage{blindtext}
+\usepackage{array}
+% \usepackage{bm}
+% \usepackage[dvipsnames]{xcolor}
+% \usepackage{comment}
+\usepackage{graphicx}
+% \usepackage{caption}
+% \usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{dsfont}
+\usepackage{longtable}
+
+
+
+% equations and theorem environments
+\numberwithin{equation}{section}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+
+% \newcommand{\figref}[1]{Figure ??????\ref{#1}}
+% \newcommand{\secref}[1]{Section??????\ref{#1}}
+% \renewcommand{\eqref}[1]{Equation ??????\ref{#1}}
+% \newtheorem{theorem}{Theorem}[section]
+\newtheorem{example}{Example}
+\newtheorem{theorem}{Theorem}
+
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{observation}[theorem]{Observation}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{fact}[theorem]{Fact}
+\newtheorem{assumption}[theorem]{Assumption}
+% \newtheorem{example}[theorem]{Example}
+\newtheorem*{remark}{Remark}
+\newenvironment{sproof}{%
+  \renewcommand{\proofname}{Proof Sketch}\proof}{\endproof}
+
+
+\newcommand\eqdef{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\tiny\sffamily def}}}{=}}}
+\newcommand\mycom[2]{\genfrac{}{}{0pt}{}{#1}{#2}}
+% \newtheorem{theorem}{Theorem}[section]
+% \newtheorem{corollary}{Corollary}[section]
+% \newtheorem{lemma}{Lemma}[section]
+% \newtheorem{observation}{Observation}[section]
+% \newtheorem{proposition}{Proposition}[section]
+% \newtheorem{definition}{Definition}[section]
+% \newtheorem{claim}{Claim}[section]
+% \newtheorem{fact}{Fact}[section]
+% \newtheorem{assumption}{Assumption}[section]
+% \newtheorem{example}{Example}[section]
+% \newtheorem*{remark}{Remark}
+
+\newcommand{\prob}[1]{\mathbb{P}\Big[{#1}\Big]}
+\newcommand{\ex}[1]{\mathbb{E}\Big[{#1}\Big]}
+\newcommand{\exD}[2]{\mathbb{E}_{#1}\Big[{#2}\Big]}
+\newcommand{\bld}[1]{\mathbf{#1}}
+\newcommand{\intinf}{\int_{-\infty}^{\infty}}
+% \newcommand{\exwrt}[2]{\mathbb{E}\Big[{#1}\Big]}
+
+% symbol shortcuts
+% \newcommand{\mb}[1]{\mathbb{#1}}
+\newcommand{\pr}{\mathbb{P}}
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\x}{\boldsymbol{x}}
+\newcommand{\y}{\boldsymbol{y}}
+\newcommand{\z}{\boldsymbol{z}}
+\renewcommand{\u}{\boldsymbol{u}}
+\newcommand{\w}{\boldsymbol{w}}
+\renewcommand{\v}{\boldsymbol{v}}
+\newcommand{\s}{\boldsymbol{s}}
+\renewcommand{\a}{\boldsymbol{a}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\cD}{\mc{D}}
+\newcommand{\then}{\Rightarrow}
+\newcommand{\LRa}{\Leftrightarrow}
+% \newcommand{\Ra}{\Rightarrow}
+\newcommand{\La}{\Leftarrow}
+% \newcommand{\ra}{\rightarrow}
+\newcommand{\la}{\leftarrow}
+\newcommand{\ua}{\uparrow}
+\newcommand{\da}{\downarrow}
+\newcommand{\pd}{\partial}
+\newcommand{\iid}{\stackrel{\text{iid}}{\sim}}
+\newcommand{\Xc}{\mathcal{X}}
+\newcommand{\Hc}{\mathcal{H}}
+\newcommand{\Dc}{\mathcal{D}}
+\newcommand{\Oc}{\mathcal{O}}
+\newcommand{\Wc}{\mathcal{W}}
+\newcommand{\TODO}[1]{ {\tt \color{red} [TODO:#1] } }
+\newcommand{\amirg}[1]{{\tt\color{orange}{#1}}}
+\newcommand{\ec}[1]{{\tt\color{blue}{#1}}}
+\newcommand\myatop[2]{\left[{{#1}\atop#2}\right]}
+\newcommand{\nadav}[1]{{\tt\color{green}{[NC: #1]}}}
+\newcommand{\red}[1]{{\color{red}{#1}}}
+\newcommand{\old}[1]{{\color{lightgray}{#1}}}
+
+% User defined Math operators
+% \DeclareMathOperator*{\argmin}{argmin}
+% \DeclareMathOperator*{\argmax}{argmax}
+
+% comments
+\newcommand{\agtodo}[1]{\textcolor{purple}{#1}}
+\newcommand{\ectodo}[1]{\textcolor{orange}{#1}}
+%\newcommand{\agtodo}[1]{}
+%\newcommand{\rmtodo}[1]{\textcolor{blue}{#1}}
+\newcommand{\rmtodo}[1]{}
+%\newcommand{\ereztodo}[1]{\textcolor{green}{#1}}
+\newcommand{\ereztodo}[1]{}
+%\newcommand{\matantodo}[1]{\textcolor{orange}{#1}}
+\newcommand{\matantodo}[1]{}
+\newcommand{\ignore}[1]{}

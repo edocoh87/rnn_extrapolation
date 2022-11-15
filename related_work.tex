@@ -1,0 +1,23 @@
+\section{Related Work}\label{sec:related_work}
+%\amirg{Cite stephanie's work on extrapolation if not there already.} \ec{we cite it in the footnote}
+The study of linear RNNs, or LDS, has a rich history dating back to at least the early works of Kalman \citep{kalman1960general, kalman1963mathematical}. 
+An extensively studied question relevant to extrapolation is that of \textit{system identification}, which explores when the parameters of a teacher LDS can be recovered (see \cite{ljung1999system}).
+Another related topic concerns finding compact realizations of systems, i.e.~realizations of the same input-output mapping as a given LDS, with a state space dimension that is lower (see \cite{antoulas2005approximation}).
+%A well known result (dating back to Kalman) is that a system is minimal (i.e.~its state space dimension cannot be reduced) if its Hankel matrix can be factorized  into Observable and Controllable parts (which have full row and column rank, respectively; see \cite{de2000minimal}). 
+%There are many methods for finding minimal realizations, or approximate minimal realizations \cite{antoulas2005approximation}.
+%
+Despite the relation, our focus is fundamentally different from the above~---~we ask what happens when one learns an LDS using GD. 
+Since GD is not explicitly designed to find a low dimensional state space, it is not clear that the application of GD to an overparameterized student allows system identification through a compact realization. 
+The fact that it does relates to the implicit properties of GD, and to our knowledge has not been investigated in the classic LDS literature.
+
+The implicit generalization of GD in training RNNs has been a subject of theoretical study for at least several years (see, e.g.,~\cite{hardt2016gradient, allen2019convergence, lim2021noisy}).
+In contrast, works analyzing the implicit extrapolation of GD have surfaced only recently, specifically in~\cite{emami2021implicit} and~\cite{cohen2022extrapolation}.\footnote{%
+We note that there have been works studying extrapolation in the context of non-recurrent NNs, e.g. \cite{xu2020neural}. This type of extrapolation deals with the behavior of learned functions outside the support of the training distribution, and is therefore fundamentally different from the type of extrapolation we consider (which deals with the behavior of learned functions over sequences longer than those seen in training).
+}
+\cite{emami2021implicit}~analyzes linear RNNs in the infinite width regime, suggesting that in this case GD is implicitly biased towards impulse responses corresponding to short-term memory. 
+\cite{cohen2022extrapolation}~studies finite-width linear RNNs (as we do), showing that when the teacher is memoryless (has state space dimension zero), GD emanating from a balanced initialization successfully extrapolates.
+Our work tackles an arguably more realistic and challenging setting~---~we analyze the regime in which the teacher has memory.
+Our results suggest that the implicit extrapolation of GD does not originate from a bias towards short-term memory, but rather a tendency to learn low dimensional state spaces.
+
+On the empirical side, extrapolation of NNs to sequence lengths beyond those seen in training has been experimentally demonstrated in numerous recent works, covering both modern language and attention models \citep{press2022train, anil2022exploring, zhang2022unveiling}, and RNNs with transition matrices of particular forms \citep{gu2022efficiently, gu2021combining, gu2020hippo, gupta2022diagonal}. 
+The current paper is motivated by these findings, and takes a step towards theoretically explaining them.
